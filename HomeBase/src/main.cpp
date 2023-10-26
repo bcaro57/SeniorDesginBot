@@ -6,6 +6,8 @@
 #define RFM95_INT   7
 #define RFM95_RST   4
 
+#define SENSOR_PIN 0
+
 // operating frequency, must match RX's freq!
 #define RF95_FREQ 915.0
 
@@ -46,6 +48,36 @@ void setup() {
 int16_t packetnum = 0;  // packet counter, we increment per xmission
 
 void loop() {
+  int sensorValue = analogRead(SENSOR_PIN);
+
+  if (sensorValue < 512){
+    int reversePWM = -(sensorValue - 511) / 2; 
+    int Left_Output = 0;
+    int Right_Output = reversePWM;
+
+    rf95.send((uint8_t *)Left_Output, 20);
+    rf95.send((uint8_t *)Right_Output, 20);
+  }
+
+  else {
+    int forwardPWM = (sensorValue - 512) / 2; 
+    int Left_Output = forwardPWM;
+    int Right_Output = 0;
+
+    rf95.send((uint8_t *)Left_Output, 20);
+    rf95.send((uint8_t *)Right_Output, 20);
+  }
+
+  delay(10);
+
+  uint8_t buf[RH_RF95_MAX_MESSAGE_LEN];
+  uint8_t len = sizeof(buf);  
+
+  if (rf95.recv(buf, &len)) {
+
+  }
+
+
   delay(1000); // Wait 1 second between transmits, could also 'sleep' here!
   Serial.println("Transmitting..."); // Send a message to rf95_server
 
