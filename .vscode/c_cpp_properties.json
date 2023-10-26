@@ -11,7 +11,8 @@
             "defines": [
                 "_DEBUG",
                 "UNICODE",
-                "_UNICODE"
+                "_UNICODE",
+                "USBCON"
             ],
             "compilerPath": "C:/Users/benca/.platformio/packages/toolchain-atmelavr/bin/avr-gcc.exe",
             "cStandard": "c11",
