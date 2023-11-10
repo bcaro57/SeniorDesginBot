@@ -1,4 +1,4 @@
-# SeniorDesignBot
+# Team 123's Senior Design Robot
 This repo is the brains behind the robot for Team 123's Senior Design Project, the low cost mobile agriculture robot!
 
-Each of the files that you see were created using PlatformIO on Visual Studio Code, which means that the actual code that we ran is in the /src/main.cpp file for each program.
+Each of the files that you see were created using PlatformIO on Visual Studio Code, which means that the actual code that we ran is in the /src/main.cpp file for each program. The many other 'folders' in each 'project' are just used by PlatformIO to keep track of the libraries, the type of board being used, etc. In order to naviage through this repository, find the project you want to look at (whether it be the transmitter, the reciever, or any of the initial test programs), and navigate to their /src/main.cpp file. These files may depend not only on external libraries, but also internal header files. These header files will also be in /src under their declaration file name (e.g. header.h) as well as their source file name (e.g. header.cpp).
