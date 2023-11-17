@@ -1,46 +1,62 @@
-#ifndef __MOTOR_HANDLER_H__
-#define __MOTOR_HANDLER_H__
+#ifndef MOTOR_HANDLER_H
+#define MOTOR_HANDLER_H
 
-#include <Arduino.h>
 
-#define MOTOR1_RPWM_Output 6
-#define MOTOR1_LPWM_Output 5
-#define MOTOR2_RPWM_Output 10
-#define MOTOR2_LPWM_Output 9
-#define MOTOR3_RPWM_Output 12
-#define MOTOR3_LPWM_Output 11
+enum class Direction{
+        Forward,
+        Reverse
+};
 
-void MotorSetup(){
-  pinMode(MOTOR1_RPWM_Output, OUTPUT); 
-  pinMode(MOTOR1_LPWM_Output, OUTPUT); 
-  pinMode(MOTOR2_RPWM_Output, OUTPUT); 
-  pinMode(MOTOR2_LPWM_Output, OUTPUT); 
-  pinMode(MOTOR3_RPWM_Output, OUTPUT); 
-  pinMode(MOTOR3_LPWM_Output, OUTPUT); 
-}
+class MotorDriver{
 
-void MotorsController(uint8_t buf, int MotorState){
-    if (MotorState){
-        Serial.println("All motors move now!");
-        
-        analogWrite(MOTOR1_RPWM_Output, 0);
-        analogWrite(MOTOR1_LPWM_Output, 100);
-        analogWrite(MOTOR2_RPWM_Output, 0);
-        analogWrite(MOTOR2_LPWM_Output, 100);
-        analogWrite(MOTOR3_RPWM_Output, 0);
-        analogWrite(MOTOR3_LPWM_Output, 100);
-    }
-    else{
-        Serial.println("No motors move now.");
+    public:
+        MotorDriver(int _rpwm, int _lpwm);
 
-        analogWrite(MOTOR1_RPWM_Output, 0);
-        analogWrite(MOTOR1_LPWM_Output, 0);
-        analogWrite(MOTOR2_RPWM_Output, 0);
-        analogWrite(MOTOR2_LPWM_Output, 0);
-        analogWrite(MOTOR3_RPWM_Output, 0);
-        analogWrite(MOTOR3_LPWM_Output, 0);
-    }
-}  
+        void init();
+        void setDirection(Direction dir);
+        float setSpeed(int percent);
+        void setVelocity(int percent);
+    private:
+
+        int RPWM;
+        int LPWM;
+        int speed;
+
+        Direction current_direction;
+};
+
+class MotorControl{
+
+    public:
+        MotorControl(MotorDriver* _LeftMotor, MotorDriver* _MiddleMotor, MotorDriver* _RightMotor);
+
+        void init();
+        void setSpeed(int percent);
+        void setMotors(bool LeftOn, bool MiddleOn, bool RightOn);
+        void update(uint8_t buf, int MotorState);
+    private:
+
+        MotorDriver* LeftMotor;
+        MotorDriver* MiddleMotor;
+        MotorDriver* RightMotor;
+
+        int speed;
+
+        const int wheelbase_coeff = 1;
+
+};
+
+class Encoder{
+
+    public:
+        Encoder(int _pulse_a, int _pulse_b);
+
+        void init();
+        static void wheelSpeed();
+    private:
+        int pulseA;
+        int pulseB;
+};
 
 
 #endif

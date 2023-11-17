@@ -1,5 +1,5 @@
-#ifndef __RADIO_HANDLER_H__
-#define __RADIO_HANDLER_H__
+#ifndef RADIO_HANDLER_H
+#define RADIO_HANDLER_H
 
 #include <Arduino.h>
 #include <SPI.h>
@@ -19,7 +19,7 @@ RH_RF95 rf95(RFM95_CS, RFM95_INT);
 int currentButtonState = LOW;
 int MotorState = LOW;
 
-void RadioSetup(){
+void RadioInit(){
   pinMode(RFM95_RST, OUTPUT);
   digitalWrite(RFM95_RST, HIGH);
   Serial.begin(115200);
@@ -63,6 +63,9 @@ int ButtonToggle(uint8_t buf){
   }
   return MotorState;
 }
+
+
+
 
 
 #endif
