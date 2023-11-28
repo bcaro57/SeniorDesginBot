@@ -13,7 +13,7 @@
 // Operating frequency, must match RX's freq!
 #define RF95_FREQ 915.0
 
-// Singleton instance of the radio driver
+// Instance of the radio driver
 RH_RF95 rf95(RFM95_CS, RFM95_INT);
 
 int currentButtonState = LOW;
@@ -22,9 +22,8 @@ int MotorState = LOW;
 void RadioInit(){
   pinMode(RFM95_RST, OUTPUT);
   digitalWrite(RFM95_RST, HIGH);
-  Serial.begin(115200);
   delay(100);
-  Serial.println("Feather LoRa TX Test!");
+  Serial.println("Feather LoRa TX Connection!");
   // manual reset
   digitalWrite(RFM95_RST, LOW);
   delay(10);
@@ -50,6 +49,14 @@ void RadioInit(){
   // you can set transmitter powers from 5 to 23 dBm:
   rf95.setTxPower(23, false);
 
+}
+
+void IOExpanderInit(){
+  if (!pcf.begin(0x20, &Wire)) {
+    Serial.println("Couldn't find PCF8575");
+    while (1);
+  }
+  Serial.println("PCF8575 init OK!");
 }
 
 int ButtonToggle(uint8_t buf){

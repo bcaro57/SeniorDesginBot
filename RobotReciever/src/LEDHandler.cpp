@@ -26,23 +26,23 @@ void LED::turnOn(bool GreenOn, bool LeftOn, bool MiddleOn, bool RightOn){
 void LED::update(uint8_t buf, int MotorState){
 
   if (buf == 0x01) {
-    turnOn(1, 1, 0, 0);
-  }
-
-  else if (buf == 0x02) {
-    turnOn(1, 0, 1, 0);
-  }
-
-  else if (buf == 0x03) {
-    turnOn(1, 0, 0, 1);
-  }
-
-  else if (buf == 0x04) {
     turnOn(1, 1, 1, 1);
   }
 
-  else if (MotorState){
+  else if (buf == 0x02) {
     turnOn(1, 1, 0, 0);
+  }
+
+  else if (buf == 0x03) {
+    turnOn(1, 0, 1, 0);
+  }
+
+  else if (buf == 0x04) {
+    turnOn(1, 0, 0, 1);
+  }
+
+  else if (MotorState){
+    turnOn(1, 1, 1, 1);
   }
 
   else {

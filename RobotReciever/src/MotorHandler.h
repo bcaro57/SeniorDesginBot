@@ -10,7 +10,7 @@ enum class Direction{
 class MotorDriver{
 
     public:
-        MotorDriver(int _rpwm, int _lpwm);
+        MotorDriver(int _lpwm, int _rpwm, Adafruit_PCF8575* _pcf = NULL);
 
         void init();
         void setDirection(Direction dir);
@@ -18,11 +18,12 @@ class MotorDriver{
         void setVelocity(int percent);
     private:
 
-        int RPWM;
         int LPWM;
+        int RPWM;
         int speed;
 
         Direction current_direction;
+        Adafruit_PCF8575* PCF;
 };
 
 class MotorControl{

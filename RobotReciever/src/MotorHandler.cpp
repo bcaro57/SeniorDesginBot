@@ -1,20 +1,30 @@
 #include <Arduino.h>
+#include <Adafruit_PCF8575.h>
 #include "MotorHandler.h"
 
 
-
-MotorDriver::MotorDriver(int _rpwm, int _lpwm): RPWM(_rpwm),
-                                                LPWM(_lpwm)
+MotorDriver::MotorDriver(int _lpwm, int _rpwm, Adafruit_PCF8575* _pcf): LPWM(_lpwm),
+                                                                        RPWM(_rpwm),
+                                                                        PCF(_pcf)
 {}
 
 
 void MotorDriver::init(){
+    if (!PCF){
+        pinMode(LPWM, OUTPUT);
+        pinMode(RPWM, OUTPUT);
 
-    pinMode(RPWM, OUTPUT);
-    pinMode(LPWM, OUTPUT);
+        analogWrite(LPWM, 0);
+        analogWrite(RPWM, 0);
+    }
 
-    analogWrite(RPWM, 0);
-    analogWrite(LPWM, 0);
+    else {
+        PCF->pinMode(LPWM, OUTPUT);
+        PCF->pinMode(RPWM, OUTPUT);
+
+        PCF->digitalWrite(LPWM, 0);
+        PCF->digitalWrite(RPWM, 0);
+    }
 }
 
 
@@ -83,7 +93,7 @@ void MotorControl::init(){
 
 void MotorControl::setSpeed(int percent){
     
-    speed = percent*255/100;
+    speed = percent;
 }
 
 
