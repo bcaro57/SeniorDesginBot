@@ -2,13 +2,8 @@
 #include <Adafruit_PCF8575.h>
 
 #include "MotorHandler.h"
-#include "LEDHandler.h"
-#include "RadioHandler.h"
+#include "PeripheralHandler.h"
 #include "pindefs.h"
-
-
-// Instance of the IO Expander
-Adafruit_PCF8575 pcf;
 
 
 // Instances of all motors/peripherals
@@ -18,19 +13,24 @@ MotorDriver LeftMotor(L_MOTOR_LPWM, L_MOTOR_RPWM);
 MotorDriver MiddleMotor(M_MOTOR_LPWM, M_MOTOR_RPWM);
 MotorDriver RightMotor(R_MOTOR_LPWM, R_MOTOR_RPWM);
 
-MotorDriver LeftActuator(L_ACTUATOR_LPWM, L_ACTUATOR_RPWM, &pcf);
-MotorDriver MiddleActuator(M_ACTUATOR_LPWM, M_ACTUATOR_RPWM, &pcf);
-MotorDriver RightActuator(R_ACTUATOR_LPWM, R_ACTUATOR_RPWM, &pcf);
+MotorDriver LeftActuator(L_ACTUATOR_LPWM, L_ACTUATOR_RPWM);
+MotorDriver MiddleActuator(M_ACTUATOR_LPWM, M_ACTUATOR_RPWM);
+MotorDriver RightActuator(R_ACTUATOR_LPWM, R_ACTUATOR_RPWM);
+
+Encoder * Encoder::instances [3] = { NULL, NULL, NULL };
+Encoder LeftEncoder(L_ENCODER_A, L_ENCODER_B);
+Encoder RightEncoder(L_ENCODER_A, L_ENCODER_B);
+Encoder MiddleEncoder(L_ENCODER_A, L_ENCODER_B);
 
 
-// Instance of higher level controller
+// Instance of higher level controller for drive motors and actuators
 MotorControl DriveController(&LeftMotor, &MiddleMotor, &RightMotor);
+MotorControl ActuatorController(&LeftMotor, &MiddleMotor, &RightMotor);
 
 
 void setup() {
   Serial.begin(115200);
   RadioInit();
-  IOExpanderInit();
   DriveController.init(); 
   Led.init();
 }
@@ -47,6 +47,7 @@ void loop() {
       MotorState = ButtonToggle(buf[0]);
       Led.update(buf[0], MotorState);
       DriveController.update(buf[0], MotorState);
+      ActuatorController.update(buf[0], MotorState);
     }
     else {
       Serial.println("Receive failed");

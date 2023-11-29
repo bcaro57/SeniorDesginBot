@@ -51,14 +51,6 @@ void RadioInit(){
 
 }
 
-void IOExpanderInit(){
-  if (!pcf.begin(0x20, &Wire)) {
-    Serial.println("Couldn't find PCF8575");
-    while (1);
-  }
-  Serial.println("PCF8575 init OK!");
-}
-
 int ButtonToggle(uint8_t buf){
   if ((buf == 0x01) && (currentButtonState)){
     currentButtonState = !currentButtonState;
@@ -72,6 +64,59 @@ int ButtonToggle(uint8_t buf){
 }
 
 
+class LED{
+
+  public:
+    LED(int _green_pin, int _left_pin, int _middle_pin, int _right_pin): GreenLED(_green_pin),
+                                                                          LeftLED(_left_pin),
+                                                                          MiddleLED(_middle_pin),
+                                                                          RightLED(_right_pin)
+    {}
+
+    void init(){
+      pinMode(GreenLED, OUTPUT);
+      pinMode(LeftLED, OUTPUT);
+      pinMode(MiddleLED, OUTPUT);
+      pinMode(RightLED, OUTPUT);
+    }
+    void turnOn(bool GreenOn, bool LeftOn, bool MiddleOn, bool RightOn){
+      digitalWrite(GreenLED, GreenOn);
+      digitalWrite(LeftLED, LeftOn);
+      digitalWrite(MiddleLED, MiddleOn);
+      digitalWrite(RightLED, RightOn);
+    }
+    void update(uint8_t buf, int MotorState){
+      if (buf == 0x01) {
+        turnOn(1, 1, 1, 1);
+      }
+
+      else if (buf == 0x02) {
+        turnOn(1, 1, 0, 0);
+      }
+
+      else if (buf == 0x03) {
+        turnOn(1, 0, 1, 0);
+      }
+
+      else if (buf == 0x04) {
+        turnOn(1, 0, 0, 1);
+      }
+
+      else if (MotorState){
+        turnOn(1, 1, 1, 1);
+      }
+
+      else {
+        turnOn(1, 0, 0, 0);
+      }
+    }
+  private:
+
+    int GreenLED;
+    int LeftLED;
+    int MiddleLED;
+    int RightLED;
+};
 
 
 

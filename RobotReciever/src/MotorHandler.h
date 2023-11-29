@@ -2,6 +2,19 @@
 #define MOTOR_HANDLER_H
 
 
+class MotorClosedLoop{
+    public:
+        MotorClosedLoop(MotorDriver* _motor, Encoder* _encoder);
+
+        void init();
+
+    private:
+        MotorDriver* Motor;
+        Encoder* MotorEncoder;
+};
+
+
+
 enum class Direction{
         Forward,
         Reverse
@@ -10,7 +23,7 @@ enum class Direction{
 class MotorDriver{
 
     public:
-        MotorDriver(int _lpwm, int _rpwm, Adafruit_PCF8575* _pcf = NULL);
+        MotorDriver(int _lpwm, int _rpwm);
 
         void init();
         void setDirection(Direction dir);
@@ -23,7 +36,7 @@ class MotorDriver{
         int speed;
 
         Direction current_direction;
-        Adafruit_PCF8575* PCF;
+        // Adafruit_PCF8575* pcf;
 };
 
 class MotorControl{
@@ -48,15 +61,40 @@ class MotorControl{
 };
 
 class Encoder{
+    int encoder0PinALast;
+    int velocity;
+    long position;
+
+    static Encoder * instances [3];
+
+    static void wheelSpeedExt0(){
+        if (Encoder::instances[0] != NULL){
+            Encoder::instances[0] -> wheelSpeed();
+        }
+    }
+    static void wheelSpeedExt1(){
+        if (Encoder::instances[1] != NULL){
+            Encoder::instances[1] -> wheelSpeed();
+        }
+    }
+    static void wheelSpeedExt2(){
+        if (Encoder::instances[2] != NULL){
+            Encoder::instances[2] -> wheelSpeed();
+        }
+    }
 
     public:
         Encoder(int _pulse_a, int _pulse_b);
 
+        void wheelSpeed();
+
         void init();
-        static void wheelSpeed();
+        long getPosition();
+        int getVelocity();
     private:
         int pulseA;
         int pulseB;
+        Direction direction;
 };
 
 

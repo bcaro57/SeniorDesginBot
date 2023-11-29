@@ -17,6 +17,14 @@
 #define R_MOTOR_LPWM 11
 #define R_MOTOR_RPWM 12
 
+// all fake values right now
+#define L_ENCODER_A A1
+#define L_ENCODER_B A2
+#define M_ENCODER_A A3
+#define M_ENCODER_B A4
+#define R_ENCODER_A A5
+#define R_ENCODER_B A6
+
 
 // For the linear actuator motors
 #define L_ACTUATOR_LPWM 7
