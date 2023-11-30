@@ -67,24 +67,44 @@ int ButtonToggle(uint8_t buf){
 class LED{
 
   public:
-    LED(int _green_pin, int _left_pin, int _middle_pin, int _right_pin): GreenLED(_green_pin),
-                                                                          LeftLED(_left_pin),
-                                                                          MiddleLED(_middle_pin),
-                                                                          RightLED(_right_pin)
+    LED(int _green_pin, int _left_pin, int _middle_pin, int _right_pin, Adafruit_MCP23X17* _mcp = NULL): GreenLED(_green_pin),
+                                                                                                         LeftLED(_left_pin),
+                                                                                                         MiddleLED(_middle_pin),
+                                                                                                         RightLED(_right_pin),
+                                                                                                         MCP(_mcp)
     {}
 
     void init(){
-      pinMode(GreenLED, OUTPUT);
-      pinMode(LeftLED, OUTPUT);
-      pinMode(MiddleLED, OUTPUT);
-      pinMode(RightLED, OUTPUT);
+      if (!MCP){
+        pinMode(GreenLED, OUTPUT);
+        pinMode(LeftLED, OUTPUT);
+        pinMode(MiddleLED, OUTPUT);
+        pinMode(RightLED, OUTPUT);
+      }
+      else{
+        MCP->pinMode(GreenLED, OUTPUT);
+        MCP->pinMode(LeftLED, OUTPUT);
+        MCP->pinMode(MiddleLED, OUTPUT);
+        MCP->pinMode(RightLED, OUTPUT);
+      }
     }
+    
+    void mcpHelper(int LED, bool state){
+      if (!MCP){
+        digitalWrite(LED, state);
+      }
+      else{
+        MCP->digitalWrite(LED, state);
+      }
+    }
+    
     void turnOn(bool GreenOn, bool LeftOn, bool MiddleOn, bool RightOn){
-      digitalWrite(GreenLED, GreenOn);
-      digitalWrite(LeftLED, LeftOn);
-      digitalWrite(MiddleLED, MiddleOn);
-      digitalWrite(RightLED, RightOn);
+      mcpHelper(GreenLED, GreenOn);
+      mcpHelper(LeftLED, LeftOn);
+      mcpHelper(MiddleLED, MiddleOn);
+      mcpHelper(RightLED, RightOn);
     }
+
     void update(uint8_t buf, int MotorState){
       if (buf == 0x01) {
         turnOn(1, 1, 1, 1);
@@ -110,12 +130,15 @@ class LED{
         turnOn(1, 0, 0, 0);
       }
     }
+
   private:
 
     int GreenLED;
     int LeftLED;
     int MiddleLED;
     int RightLED;
+
+    Adafruit_MCP23X17* MCP;
 };
 
 

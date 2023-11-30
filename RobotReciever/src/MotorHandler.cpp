@@ -1,18 +1,18 @@
 #include <Arduino.h>
-#include <Adafruit_PCF8575.h>
+#include <Adafruit_MCP23X17.h>
 #include "MotorHandler.h"
 #include "pindefs.h"
 
 
-MotorClosedLoop::MotorClosedLoop(MotorDriver* _motor, Encoder* _encoder): Motor(_motor),
-                                                                          MotorEncoder(_encoder)
-{}
+// MotorClosedLoop::MotorClosedLoop(MotorDriver* _motor, Encoder* _encoder): Motor(_motor),
+//                                                                           MotorEncoder(_encoder)
+// {}
 
 
-void MotorClosedLoop::init(){
-    Motor->init();
-    MotorEncoder->init();
-}
+// void MotorClosedLoop::init(){
+//     Motor->init();
+//     MotorEncoder->init();
+// }
 
 
 
@@ -66,66 +66,69 @@ void MotorDriver::setVelocity(int percentage){
 
 
 
-Encoder::Encoder(int _pulse_a, int _pulse_b): pulseA(_pulse_a),
-                                              pulseB(_pulse_b)
-{}
+// Encoder::Encoder(int _pulse_a, int _pulse_b, Adafruit_MCP23X17* _mcp = NULL): pulseA(_pulse_a),
+//                                                                               pulseB(_pulse_b),
+//                                                                               MCP(_mcp)
+// {}
 
 
-void Encoder::wheelSpeed(){
-    int Lstate = digitalRead(pulseA);   
-    if((encoder0PinALast == LOW) && Lstate==HIGH){     
-        int val = digitalRead(pulseB);     
-        if(val == LOW && direction == Direction::Forward) {       
-            direction = Direction::Reverse; //Reverse     
-        }     
-        else if(val == HIGH && direction == Direction::Reverse){       
-            direction = Direction::Forward;  //Forward     
-        }  
-    }   
-    encoder0PinALast = Lstate;     
+// void Encoder::wheelSpeed(){
+//     int Lstate = digitalRead(pulseA);   
+//     if((encoder0PinALast == LOW) && Lstate==HIGH){     
+//         int val = digitalRead(pulseB);     
+//         if(val == LOW && direction == Direction::Forward) {       
+//             direction = Direction::Reverse; //Reverse     
+//         }     
+//         else if(val == HIGH && direction == Direction::Reverse){       
+//             direction = Direction::Forward;  //Forward     
+//         }  
+//     }   
+//     encoder0PinALast = Lstate;     
 
-    if(direction == Direction::Reverse){ 
-        velocity++; 
-        position++;   
-    }
-    else{
-        velocity--;
-        position--;
-    } 
+//     if(direction == Direction::Reverse){ 
+//         velocity++; 
+//         position++;   
+//     }
+//     else{
+//         velocity--;
+//         position--;
+//     } 
 
-}
+// }
 
 
-void Encoder::init(){
+// void Encoder::init(){
 
-    Direction direction = Direction::Forward;
-    pinMode(pulseB, INPUT);
-    switch(pulseA){
-        case L_ENCODER_A:
-            attachInterrupt(digitalPinToInterrupt(pulseA), wheelSpeedExt0, CHANGE);
-            instances[0] = this;
-            break;
-        case M_ENCODER_A:
-            attachInterrupt(digitalPinToInterrupt(pulseA), wheelSpeedExt1, CHANGE);
-            instances[1] = this;
-            break;
-        case R_ENCODER_A:
-            attachInterrupt(digitalPinToInterrupt(pulseA), wheelSpeedExt2, CHANGE);
-            instances[2] = this;
-            break;
-    }
+//     Direction direction = Direction::Forward;
+//     switch(pulseA){
+//         case L_ENCODER_A:
+//             pinMode(pulseB, INPUT);
+//             attachInterrupt(digitalPinToInterrupt(pulseA), wheelSpeedExt0, CHANGE);
+//             instances[0] = this;
+//             break;
+//         case M_ENCODER_A:
+//             pinMode(pulseB, INPUT);
+//             attachInterrupt(digitalPinToInterrupt(pulseA), wheelSpeedExt1, CHANGE);
+//             instances[1] = this;
+//             break;
+//         case R_ENCODER_A:
+//             pinMode(pulseB, INPUT);
+//             attachInterrupt(digitalPinToInterrupt(pulseA), wheelSpeedExt2, CHANGE);
+//             instances[2] = this;
+//             break;
+//     }
     
-}
+// }
 
 
-long Encoder::getPosition(){
-    return position;
-}
+// long Encoder::getPosition(){
+//     return position;
+// }
 
 
-int Encoder::getVelocity(){
-    return velocity;
-}
+// int Encoder::getVelocity(){
+//     return velocity;
+// }
 
 
 
@@ -141,9 +144,9 @@ void MotorControl::init(){
     MiddleMotor->init();
     RightMotor->init();
 
-    LeftMotor->setDirection(Direction::Forward);
-    MiddleMotor->setDirection(Direction::Forward);
-    RightMotor->setDirection(Direction::Forward);
+    LeftMotor->setDirection(Direction::Reverse);
+    MiddleMotor->setDirection(Direction::Reverse);
+    RightMotor->setDirection(Direction::Reverse);
 
     setSpeed(80);
 }
