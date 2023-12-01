@@ -2,11 +2,19 @@
 #define PINDEFS_H
 
 
+/*
+
+All pin definitions for the feather or expander should be defined here. Anything controller by
+the expander should be specifically notified as expander pins and which ones they are
+
+*/
+
+
 // LED pins (in the IO expander)
-#define GREEN_LED_PIN 11 //B3
-#define LEFT_LED_PIN 8   //B0
-#define MIDDLE_LED_PIN 9 //B1
-#define RIGHT_LED_PIN 10 //B2
+#define GREEN_LED_PIN 11        // expander pin B3
+#define LEFT_LED_PIN 8          // expander pin B0
+#define MIDDLE_LED_PIN 9        // expander pin B1
+#define RIGHT_LED_PIN 10        // expander pin B2
 
 
 // For the drive motors
@@ -18,7 +26,7 @@
 #define R_MOTOR_RPWM 12
 
 
-// For the encoders - all fake values right now
+// For the encoders - all fake values right now, will need interrupt pins for A and normal pins for B
 #define L_ENCODER_A 7 
 #define L_ENCODER_B 8
 #define M_ENCODER_A 9

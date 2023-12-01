@@ -16,8 +16,9 @@
 // Instance of the radio driver
 RH_RF95 rf95(RFM95_CS, RFM95_INT);
 
-int currentButtonState = LOW;
-int MotorState = LOW;
+/*
+RadioInit - initializes the radio transmission protocols
+*/
 
 void RadioInit(){
   pinMode(RFM95_RST, OUTPUT);
@@ -51,17 +52,40 @@ void RadioInit(){
 
 }
 
-bool ButtonToggle(uint8_t buf) {
-  if ((buf == 0x01) && (currentButtonState)) {
-    currentButtonState = !currentButtonState;
-    MotorState = !MotorState;
-    delay(100);
-  }
-  else if ((buf == 0x01) && (!currentButtonState)) {
-    currentButtonState = !currentButtonState;
-  }
-  return MotorState;
-}
+
+/*
+ButtonToggle - takes in a specific buffer value and toggles a switch to be on or off (which has some slight debounce)
+*/
+
+class DataInfo {
+
+  public:
+    DataInfo(uint8_t _buf_data): bufData(_buf_data)
+    {}
+
+    bool ButtonToggle() {
+      if ((bufData == 0x01) && (currentButtonState)) {
+        currentButtonState = !currentButtonState;
+        ToggleState = !ToggleState;
+        delay(100);
+      }
+      else if ((bufData == 0x01) && (!currentButtonState)) {
+        currentButtonState = !currentButtonState;
+      }
+      return ToggleState;
+    }
+
+  private:
+    uint8_t bufData;
+    bool currentButtonState;
+    bool ToggleState;
+};
+
+
+
+/*
+mcpInit - initializes the IO Expander with the 'begin_I2C' method
+*/
 
 void mcpInit(Adafruit_MCP23X17* mcp) {
   if (!mcp->begin_I2C()) {
@@ -69,6 +93,25 @@ void mcpInit(Adafruit_MCP23X17* mcp) {
     while (1);
   } 
 }
+
+
+/*
+LED - designed to handle the onboard indicator LEDs to help inform the user of what's going on
+
+inputs into the constructor: each of the LEDs (green, left, middle, right) and the MCP (IO expander)
+
+methods:
+  init()            -> initializes the LEDs, checking if they need to be set as expander pins
+  mcpHelper()       -> if the expander is registered, treat any pins as expander pins
+  turnOn()          -> uses the mcpHelper and the buffer to determine which LEDs are on
+
+variables:
+  GreenLED          -> the pin for the green LED
+  LeftLED           -> the pin for the LED on the left
+  MiddleLED         -> the pin for the LED in the middle
+  RightLED          -> the pin for the LED on the right
+  MCP               -> the IO expansion board object
+*/
 
 class LED {
 
@@ -114,7 +157,7 @@ class LED {
       mcpHelper(RightLED, RightOn);
     }
 
-    void update(uint8_t buf, int MotorState) {
+    void update(uint8_t buf, int ToggleState) {
       
       if (buf == 0x01) {
         turnOn(1, 1, 1, 1);
@@ -132,7 +175,7 @@ class LED {
         turnOn(1, 0, 0, 1);
       }
 
-      else if (MotorState) {
+      else if (ToggleState) {
         turnOn(1, 1, 1, 1);
       }
 
