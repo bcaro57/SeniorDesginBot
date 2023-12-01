@@ -9,7 +9,7 @@
 // {}
 
 
-// void MotorClosedLoop::init(){
+// void MotorClosedLoop::init() {
 //     Motor->init();
 //     MotorEncoder->init();
 // }
@@ -21,45 +21,38 @@ MotorDriver::MotorDriver(int _lpwm, int _rpwm): LPWM(_lpwm),
 {}
 
 
-void MotorDriver::init(){
-    // if (!PCF){
-        pinMode(LPWM, OUTPUT);
-        pinMode(RPWM, OUTPUT);
+void MotorDriver::init() {
 
-        analogWrite(LPWM, 0);
-        analogWrite(RPWM, 0);
-    // }
-
-    // else {
-        // PCF->pinMode(LPWM, OUTPUT);
-        // PCF->pinMode(RPWM, OUTPUT);
-
-        // PCF->digitalWrite(LPWM, 0);
-        // PCF->digitalWrite(RPWM, 0);
-    // }
+    pinMode(LPWM, OUTPUT);
+    pinMode(RPWM, OUTPUT);
+    analogWrite(LPWM, 0);
+    analogWrite(RPWM, 0);
 }
 
 
-void MotorDriver::setDirection(Direction dir){
+void MotorDriver::setDirection(Direction dir) {
 
     current_direction = dir;
 }
 
 
-float MotorDriver::setSpeed(int percentage){
+float MotorDriver::setSpeed(int value) {
 
-    return speed = percentage*255/100;
+    return speed = value*100/255;
 }
 
 
-void MotorDriver::setVelocity(int percentage){
-    if (current_direction == Direction::Forward){
-        analogWrite(RPWM, setSpeed(percentage));
+void MotorDriver::setVelocity(int percentage) {
+
+    if (percentage >= 0) {
+        setDirection(Direction::Forward);
+        analogWrite(RPWM, setSpeed(abs(percentage)));
         analogWrite(LPWM, 0);
     }
-    else{
+    else {
+        setDirection(Direction::Reverse);
         analogWrite(RPWM, 0);
-        analogWrite(LPWM, setSpeed(percentage));
+        analogWrite(LPWM, setSpeed(abs(percentage)));
     }
 }
 
@@ -72,24 +65,24 @@ void MotorDriver::setVelocity(int percentage){
 // {}
 
 
-// void Encoder::wheelSpeed(){
+// void Encoder::wheelSpeed() {
 //     int Lstate = digitalRead(pulseA);   
-//     if((encoder0PinALast == LOW) && Lstate==HIGH){     
+//     if((encoder0PinALast == LOW) && Lstate==HIGH) {     
 //         int val = digitalRead(pulseB);     
 //         if(val == LOW && direction == Direction::Forward) {       
 //             direction = Direction::Reverse; //Reverse     
 //         }     
-//         else if(val == HIGH && direction == Direction::Reverse){       
+//         else if(val == HIGH && direction == Direction::Reverse) {       
 //             direction = Direction::Forward;  //Forward     
 //         }  
 //     }   
 //     encoder0PinALast = Lstate;     
 
-//     if(direction == Direction::Reverse){ 
+//     if(direction == Direction::Reverse) { 
 //         velocity++; 
 //         position++;   
 //     }
-//     else{
+//     else {
 //         velocity--;
 //         position--;
 //     } 
@@ -100,7 +93,7 @@ void MotorDriver::setVelocity(int percentage){
 // void Encoder::init(){
 
 //     Direction direction = Direction::Forward;
-//     switch(pulseA){
+//     switch(pulseA) {
 //         case L_ENCODER_A:
 //             pinMode(pulseB, INPUT);
 //             attachInterrupt(digitalPinToInterrupt(pulseA), wheelSpeedExt0, CHANGE);
@@ -121,45 +114,44 @@ void MotorDriver::setVelocity(int percentage){
 // }
 
 
-// long Encoder::getPosition(){
+// long Encoder::getPosition() {
 //     return position;
 // }
 
 
-// int Encoder::getVelocity(){
+// int Encoder::getVelocity() {
 //     return velocity;
 // }
 
 
 
-MotorControl::MotorControl(MotorDriver*_LeftMotor, MotorDriver* _MiddleMotor, MotorDriver* _RightMotor): LeftMotor(_LeftMotor),
-                                                                                                         MiddleMotor(_MiddleMotor),
-                                                                                                         RightMotor(_RightMotor)
+MotorControl::MotorControl(MotorDriver* _LeftMotor, MotorDriver* _MiddleMotor, MotorDriver* _RightMotor): LeftMotor(_LeftMotor),
+                                                                                                          MiddleMotor(_MiddleMotor),
+                                                                                                          RightMotor(_RightMotor)
 {}
 
 
-void MotorControl::init(){
+void MotorControl::init() {
 
     LeftMotor->init();
     MiddleMotor->init();
     RightMotor->init();
 
-    LeftMotor->setDirection(Direction::Reverse);
-    MiddleMotor->setDirection(Direction::Reverse);
-    RightMotor->setDirection(Direction::Reverse);
+    LeftMotor->setVelocity(0);
+    MiddleMotor->setVelocity(0);
+    RightMotor->setVelocity(0);
 
-    setSpeed(80);
+    setSpeed(0);
 }
 
 
-void MotorControl::setSpeed(int percent){
+void MotorControl::setSpeed(int percent) {
     
     speed = percent;
 }
 
 
-
-void MotorControl::update(uint8_t buf, int MotorState){
+void MotorControl::update(uint8_t buf, bool MotorState) {
 
     if (buf == 0x01) {
         LeftMotor->setVelocity(0);

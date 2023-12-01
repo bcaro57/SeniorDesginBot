@@ -14,18 +14,33 @@
 RH_RF95 rf95(RFM95_CS, RFM95_INT);
 
 // Defining the pins being used
-#define ALL_BUTTON 9
-#define BUTTON_PIN_RIGHT 10
-#define BUTTON_PIN_MIDDLE 11
-#define BUTTON_PIN_LEFT 12
+#define BUTTON_1 3
+#define BUTTON_2 6
+#define BUTTON_3 10
+#define BUTTON_4 12
+#define JOYSTICK A0
 
+// LED pins
+#define LED_1 2
+#define LED_2 5
+#define LED_3 9
+#define LED_4 11
+
+int delayTime = 10;
+int bufLen = 3;
 
 void setup() {
   // for the button
-  pinMode(ALL_BUTTON, INPUT_PULLUP);
-  pinMode(BUTTON_PIN_RIGHT, INPUT_PULLUP);
-  pinMode(BUTTON_PIN_MIDDLE, INPUT_PULLUP);
-  pinMode(BUTTON_PIN_LEFT, INPUT_PULLUP);
+  pinMode(BUTTON_1, INPUT_PULLUP);
+  pinMode(BUTTON_2, INPUT_PULLUP);
+  pinMode(BUTTON_3, INPUT_PULLUP);
+  pinMode(BUTTON_4, INPUT_PULLUP);
+  pinMode(JOYSTICK, INPUT_PULLUP);
+
+  pinMode(LED_1, OUTPUT);
+  pinMode(LED_2, OUTPUT);
+  pinMode(LED_3, OUTPUT);
+  pinMode(LED_4, OUTPUT);
 
   // for the radio stuff
   pinMode(RFM95_RST, OUTPUT);
@@ -61,39 +76,53 @@ void setup() {
 
 
 void loop() {
-  int delayTime = 10;
+
+  digitalWrite(LED_1, LOW);
+  digitalWrite(LED_2, LOW);
+  digitalWrite(LED_3, LOW);
+  digitalWrite(LED_4, LOW);
   
-  uint8_t buttonValue[1];
-  if (digitalRead(BUTTON_PIN_LEFT) == LOW ) {
-    Serial.print("The left button is being pressed and the value is ");
+  uint8_t buttonValue[bufLen];
+  if (digitalRead(BUTTON_1) == LOW ) {
+    Serial.print("The 'ALL' button is being pressed and the value is ");
     buttonValue[0] = 0x01;
+    digitalWrite(LED_1, HIGH);
     Serial.println(buttonValue[0]);
     delay(delayTime);
   }
-  else if (digitalRead(BUTTON_PIN_MIDDLE) == LOW ) {
+  else if (digitalRead(BUTTON_2) == LOW ) {
     Serial.print("The middle button is being pressed and the value is ");
-    buttonValue[0] = 0x02;
+    buttonValue[1] = 0x02;
     Serial.println(buttonValue[0]);
+    digitalWrite(LED_2, HIGH);
     delay(delayTime);
   }
-  else if (digitalRead(BUTTON_PIN_RIGHT) == LOW ) {
+  else if (digitalRead(BUTTON_3) == LOW ) {
     Serial.print("The right button is being pressed and the value is ");
-    buttonValue[0] = 0x03;
+    buttonValue[1] = 0x03;
     Serial.println(buttonValue[0]);
+    digitalWrite(LED_3, HIGH);
     delay(delayTime);
   }
-  else if (digitalRead(ALL_BUTTON) == LOW ) {
+  else if (digitalRead(BUTTON_4) == LOW ) {
     Serial.print("The 'all' button is being pressed and the value is ");
-    buttonValue[0] = 0x04;
+    buttonValue[1] = 0x04;
     Serial.println(buttonValue[0]);
+    digitalWrite(LED_4, HIGH);
     delay(delayTime);
   }
   else {
     Serial.print("The buttons are not being pressed and the value is ");
     buttonValue[0] = 0x00;
+    buttonValue[1] = 0x00;
     Serial.println(buttonValue[0]);
     delay(delayTime);
     }
-  rf95.send((uint8_t *)buttonValue, 1);
+  
+  buttonValue[2] = analogRead(JOYSTICK)/4;
+  Serial.print("The joystick value is ");
+  Serial.println(buttonValue[1]);
+
+  rf95.send((uint8_t *)buttonValue, bufLen);
   rf95.waitPacketSent();
 }

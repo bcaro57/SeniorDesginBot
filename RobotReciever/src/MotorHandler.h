@@ -45,9 +45,9 @@ class MotorControl{
         MotorControl(MotorDriver* _LeftMotor, MotorDriver* _MiddleMotor, MotorDriver* _RightMotor);
 
         void init();
+        void switchDirection(Direction dir, MotorDriver* Motor);
         void setSpeed(int percent);
-        void setMotors(bool LeftOn, bool MiddleOn, bool RightOn);
-        void update(uint8_t buf, int MotorState);
+        void update(uint8_t buf, bool MotorState = false);
     private:
 
         MotorDriver* LeftMotor;
@@ -55,8 +55,6 @@ class MotorControl{
         MotorDriver* RightMotor;
 
         int speed;
-
-        const int wheelbase_coeff = 1;
 
 };
 

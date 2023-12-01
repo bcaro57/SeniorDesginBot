@@ -28,13 +28,15 @@ MotorDriver RightActuator(R_ACTUATOR_LPWM, R_ACTUATOR_RPWM);
 MotorControl DriveController(&LeftMotor, &MiddleMotor, &RightMotor);
 MotorControl ActuatorController(&LeftActuator, &MiddleActuator, &RightActuator);
 
+int bufLen = 3;
 
 void setup() {
   Serial.begin(115200);
+  mcpInit(&mcp);
   RadioInit();
+  Led.init();
   DriveController.init(); 
   ActuatorController.init();
-  // Led.init();
 }
 
 
@@ -42,14 +44,15 @@ void loop() {
 
   if(rf95.available()) {
 
-    uint8_t buf[1];
+    uint8_t buf[bufLen];
     uint8_t len = sizeof(buf);
 
     if(rf95.recv(buf, &len)) {
       MotorState = ButtonToggle(buf[0]);
-      // Led.update(buf[0], MotorState);
+      Led.update(buf[0], MotorState);
+      DriveController.setSpeed(buf[2]);
       DriveController.update(buf[0], MotorState);
-      ActuatorController.update(buf[0], MotorState);
+      ActuatorController.update(buf[1]);
     }
     else {
       Serial.println("Receive failed");

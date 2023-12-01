@@ -2,11 +2,11 @@
 #define PINDEFS_H
 
 
-// 
-#define GREEN_LED_PIN 8
-#define LEFT_LED_PIN 9
-#define MIDDLE_LED_PIN 10
-#define RIGHT_LED_PIN 11
+// LED pins (in the IO expander)
+#define GREEN_LED_PIN 11 //B3
+#define LEFT_LED_PIN 8   //B0
+#define MIDDLE_LED_PIN 9 //B1
+#define RIGHT_LED_PIN 10 //B2
 
 
 // For the drive motors
@@ -17,8 +17,9 @@
 #define R_MOTOR_LPWM 11
 #define R_MOTOR_RPWM 12
 
-// all fake values right now
-#define L_ENCODER_A 7
+
+// For the encoders - all fake values right now
+#define L_ENCODER_A 7 
 #define L_ENCODER_B 8
 #define M_ENCODER_A 9
 #define M_ENCODER_B 10

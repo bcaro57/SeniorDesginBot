@@ -51,20 +51,26 @@ void RadioInit(){
 
 }
 
-int ButtonToggle(uint8_t buf){
-  if ((buf == 0x01) && (currentButtonState)){
+bool ButtonToggle(uint8_t buf) {
+  if ((buf == 0x01) && (currentButtonState)) {
     currentButtonState = !currentButtonState;
     MotorState = !MotorState;
     delay(100);
   }
-  else if ((buf == 0x01) && (!currentButtonState)){
+  else if ((buf == 0x01) && (!currentButtonState)) {
     currentButtonState = !currentButtonState;
   }
   return MotorState;
 }
 
+void mcpInit(Adafruit_MCP23X17* mcp) {
+  if (!mcp->begin_I2C()) {
+    Serial.println("Error.");
+    while (1);
+  } 
+}
 
-class LED{
+class LED {
 
   public:
     LED(int _green_pin, int _left_pin, int _middle_pin, int _right_pin, Adafruit_MCP23X17* _mcp = NULL): GreenLED(_green_pin),
@@ -74,14 +80,15 @@ class LED{
                                                                                                          MCP(_mcp)
     {}
 
-    void init(){
-      if (!MCP){
+    void init() {
+
+      if (!MCP) {
         pinMode(GreenLED, OUTPUT);
         pinMode(LeftLED, OUTPUT);
         pinMode(MiddleLED, OUTPUT);
         pinMode(RightLED, OUTPUT);
       }
-      else{
+      else {
         MCP->pinMode(GreenLED, OUTPUT);
         MCP->pinMode(LeftLED, OUTPUT);
         MCP->pinMode(MiddleLED, OUTPUT);
@@ -89,23 +96,26 @@ class LED{
       }
     }
     
-    void mcpHelper(int LED, bool state){
-      if (!MCP){
+    void mcpHelper(int LED, bool state) {
+
+      if (!MCP) {
         digitalWrite(LED, state);
       }
-      else{
+      else {
         MCP->digitalWrite(LED, state);
       }
     }
     
-    void turnOn(bool GreenOn, bool LeftOn, bool MiddleOn, bool RightOn){
+    void turnOn(bool GreenOn, bool LeftOn, bool MiddleOn, bool RightOn) {
+
       mcpHelper(GreenLED, GreenOn);
       mcpHelper(LeftLED, LeftOn);
       mcpHelper(MiddleLED, MiddleOn);
       mcpHelper(RightLED, RightOn);
     }
 
-    void update(uint8_t buf, int MotorState){
+    void update(uint8_t buf, int MotorState) {
+      
       if (buf == 0x01) {
         turnOn(1, 1, 1, 1);
       }
@@ -122,7 +132,7 @@ class LED{
         turnOn(1, 0, 0, 1);
       }
 
-      else if (MotorState){
+      else if (MotorState) {
         turnOn(1, 1, 1, 1);
       }
 
