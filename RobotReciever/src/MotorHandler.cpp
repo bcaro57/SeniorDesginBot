@@ -178,7 +178,7 @@ void MotorControl::setSpeed(int percent) {
 }
 
 
-void MotorControl::update(uint8_t buf, bool ToggleStateMotors, bool ToggleStateL, bool ToggleStateM, bool ToggleStateR) {
+void MotorControl::update(uint8_t buf, bool ToggleState) {
 
     if (buf == 0x01) {
         LeftMotor->setVelocity(0);
@@ -186,25 +186,25 @@ void MotorControl::update(uint8_t buf, bool ToggleStateMotors, bool ToggleStateL
         RightMotor->setVelocity(0);    
     }
 
-    else if (ToggleStateL) {
+    else if (0x02) {
         LeftMotor->setVelocity(speed);
         MiddleMotor->setVelocity(0);
         RightMotor->setVelocity(0); 
     }
 
-    else if (ToggleStateM) {
+    else if (0x03) {
         LeftMotor->setVelocity(0);
         MiddleMotor->setVelocity(speed);
         RightMotor->setVelocity(0); 
     }
 
-    else if (ToggleStateR) {
+    else if (0x03) {
         LeftMotor->setVelocity(0);
         MiddleMotor->setVelocity(0);
         RightMotor->setVelocity(speed); 
     }
 
-    else if (ToggleStateMotors){
+    else if (ToggleState){
         LeftMotor->setVelocity(speed);
         MiddleMotor->setVelocity(speed);
         RightMotor->setVelocity(speed); 

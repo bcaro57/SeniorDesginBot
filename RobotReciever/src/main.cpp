@@ -18,10 +18,10 @@ MotorDriver LeftActuator(L_ACTUATOR_LPWM, L_ACTUATOR_RPWM);
 MotorDriver MiddleActuator(M_ACTUATOR_LPWM, M_ACTUATOR_RPWM);
 MotorDriver RightActuator(R_ACTUATOR_LPWM, R_ACTUATOR_RPWM);
 
-Encoder * Encoder::instances [3] = { NULL, NULL, NULL };
-Encoder LeftEncoder(L_ENCODER_A, L_ENCODER_B);
-Encoder MiddleEncoder(M_ENCODER_A, M_ENCODER_B);
-Encoder RightEncoder(R_ENCODER_A, R_ENCODER_B);
+// Encoder * Encoder::instances [3] = { NULL, NULL, NULL };
+// Encoder LeftEncoder(L_ENCODER_A, L_ENCODER_B);
+// Encoder MiddleEncoder(M_ENCODER_A, M_ENCODER_B);
+// Encoder RightEncoder(R_ENCODER_A, R_ENCODER_B);
 
 
 // Instances of higher level controller for drive motors and actuators
@@ -67,17 +67,14 @@ void loop() {
     uint8_t len = sizeof(buf);
 
     if(rf95.recv(buf, &len)) {
-      // setting all button toggle variables
-      bool MotorToggle = DriveToggle.ButtonToggle();
-      bool LToggle = LeftActuatorToggle.ButtonToggle();
-      bool MToggle = MiddleActuatorToggle.ButtonToggle();
-      bool RToggle = RightActuatorToggle.ButtonToggle();
+      // setting the button toggle variable
+      // bool MotorToggle = DriveToggle.ButtonToggle();
 
       // updating each controller
-      Led.update(buf[0], DriveToggle.ButtonToggle());
+      Led.update(buf[0], true);
       DriveController.setSpeed(buf[2]);
-      DriveController.update(buf[0], DriveToggle.ButtonToggle());
-      ActuatorController.update(buf[1], false, LToggle, MToggle, RToggle);
+      DriveController.update(buf[0], true);
+      ActuatorController.update(buf[1], true);
     }
     else {
       Serial.println("Receive failed");

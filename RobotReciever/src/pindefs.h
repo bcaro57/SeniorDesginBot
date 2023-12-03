@@ -18,12 +18,12 @@ the expander should be specifically notified as expander pins and which ones the
 
 
 // For the drive motors
-#define L_MOTOR_LPWM 5
-#define L_MOTOR_RPWM 6
-#define M_MOTOR_LPWM 9
-#define M_MOTOR_RPWM 10
-#define R_MOTOR_LPWM 11
-#define R_MOTOR_RPWM 12
+#define L_MOTOR_LPWM A0
+#define L_MOTOR_RPWM A1
+#define M_MOTOR_LPWM A2
+#define M_MOTOR_RPWM A3
+#define R_MOTOR_LPWM A4
+#define R_MOTOR_RPWM A5
 
 
 // For the encoders - all fake values right now, will need interrupt pins for A and normal pins for B
@@ -36,12 +36,12 @@ the expander should be specifically notified as expander pins and which ones the
 
 
 // For the linear actuator motors
-#define L_ACTUATOR_LPWM A0
-#define L_ACTUATOR_RPWM A1
-#define M_ACTUATOR_LPWM A2
-#define M_ACTUATOR_RPWM A3
-#define R_ACTUATOR_LPWM A4
-#define R_ACTUATOR_RPWM A5
+#define L_ACTUATOR_LPWM 5
+#define L_ACTUATOR_RPWM 6
+#define M_ACTUATOR_LPWM 9
+#define M_ACTUATOR_RPWM 10
+#define R_ACTUATOR_LPWM 11
+#define R_ACTUATOR_RPWM 12
 
 
 

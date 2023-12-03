@@ -102,7 +102,7 @@ class MotorControl{
 
         void init();
         void setSpeed(int percent);
-        void update(uint8_t buf, bool ToggleStateMotors = false, bool ToggleStateL = false, bool ToggleStateM = false, bool ToggleStateR = false);
+        void update(uint8_t buf, bool ToggleState = false);
     private:
 
         MotorDriver* LeftMotor;
