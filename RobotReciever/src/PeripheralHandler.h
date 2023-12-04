@@ -54,29 +54,42 @@ void RadioInit(){
 
 
 /*
-ButtonToggle - takes in a specific buffer value and toggles a switch to be on or off (which has some slight debounce)
+
+DataInfo - designed to help handle some of the buffer values (digesting the data)
+
+no constructor present
+
+methods:
+  ButtonToggle()      -> takes in a specific buffer value and toggles a switch to be on or off (which has some slight debounce of 100 ms)
+  MapValue()          -> takes in a specific buffer value and interprets it as a percent (from -100 to +100) from its original form (from 0 to 255)
+
+variables:
+  currentButtonState  -> the current state of the button
+  ToggleStte          -> the state that determines if the toggle is on or off
 */
 
 class DataInfo {
 
   public:
-    DataInfo(uint8_t _buf_data): bufData(_buf_data)
-    {}
-
-    bool ButtonToggle() {
-      if ((bufData == 0x01) && (currentButtonState)) {
+    bool ButtonToggle(uint8_t bufData, uint8_t targetVal) {
+      if ((bufData == targetVal) && (currentButtonState)) {
         currentButtonState = !currentButtonState;
         ToggleState = !ToggleState;
-        delay(100);
+        delay(150);
       }
-      else if ((bufData == 0x01) && (!currentButtonState)) {
+      else if ((bufData == targetVal) && (!currentButtonState)) {
         currentButtonState = !currentButtonState;
       }
       return ToggleState;
     }
 
+    int MapValue(uint8_t bufData) {
+      // return ((bufData - in_min) * (out_max - out_min) / (in_max - in_min)) + out_min;
+      // return ((bufData - 0) * (100 - -100) / (255 - 0)) + -100;
+      return map(bufData, 0, 255, -100, 100);
+    }
+
   private:
-    uint8_t bufData;
     bool currentButtonState;
     bool ToggleState;
 };
@@ -101,16 +114,16 @@ LED - designed to handle the onboard indicator LEDs to help inform the user of w
 inputs into the constructor: each of the LEDs (green, left, middle, right) and the MCP (IO expander)
 
 methods:
-  init()            -> initializes the LEDs, checking if they need to be set as expander pins
-  mcpHelper()       -> if the expander is registered, treat any pins as expander pins
-  turnOn()          -> uses the mcpHelper and the buffer to determine which LEDs are on
+  init()              -> initializes the LEDs, checking if they need to be set as expander pins
+  mcpHelper()         -> if the expander is registered, treat any pins as expander pins
+  turnOn()            -> uses the mcpHelper and the buffer to determine which LEDs are on
 
 variables:
-  GreenLED          -> the pin for the green LED
-  LeftLED           -> the pin for the LED on the left
-  MiddleLED         -> the pin for the LED in the middle
-  RightLED          -> the pin for the LED on the right
-  MCP               -> the IO expansion board object
+  GreenLED            -> the pin for the green LED
+  LeftLED             -> the pin for the LED on the left
+  MiddleLED           -> the pin for the LED in the middle
+  RightLED            -> the pin for the LED on the right
+  MCP                 -> the IO expansion board object
 */
 
 class LED {

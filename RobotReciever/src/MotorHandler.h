@@ -66,6 +66,7 @@ class MotorDriver{
         void setDirection(Direction dir);
         float setSpeed(int percent);
         void setVelocity(int percent);
+        Direction getDirection();
     private:
 
         int LPWM;
@@ -102,7 +103,7 @@ class MotorControl{
 
         void init();
         void setSpeed(int percent);
-        void update(uint8_t buf, bool ToggleState = false);
+        void update(uint8_t buf, bool ToggleState = false, bool LToggle = false, bool MToggle = false, bool RToggle = false);
     private:
 
         MotorDriver* LeftMotor;
@@ -110,6 +111,10 @@ class MotorControl{
         MotorDriver* RightMotor;
 
         int speed;
+        bool left_was_toggled;
+        bool middle_was_toggled;
+        bool right_was_toggled;
+
 
 };
 

@@ -59,15 +59,19 @@ float MotorDriver::setSpeed(int percentage) {
 void MotorDriver::setVelocity(int percentage) {
 
     if (percentage >= 0) {
-        setDirection(Direction::Forward);
+        // setDirection(Direction::Forward);
         analogWrite(RPWM, setSpeed(abs(percentage)));
         analogWrite(LPWM, 0);
     }
     else {
-        setDirection(Direction::Reverse);
+        // setDirection(Direction::Reverse);
         analogWrite(RPWM, 0);
         analogWrite(LPWM, setSpeed(abs(percentage)));
     }
+}
+
+Direction MotorDriver::getDirection() {
+    return current_direction;
 }
 
 
@@ -168,7 +172,11 @@ void MotorControl::init() {
     MiddleMotor->setVelocity(0);
     RightMotor->setVelocity(0);
 
-    setSpeed(0);
+    left_was_toggled = false;
+    middle_was_toggled = false;
+    right_was_toggled = false;
+
+    setSpeed(100);
 }
 
 
@@ -178,41 +186,115 @@ void MotorControl::setSpeed(int percent) {
 }
 
 
-void MotorControl::update(uint8_t buf, bool ToggleState) {
+void MotorControl::update(uint8_t buf, bool ToggleState, bool LToggle, bool MToggle, bool RToggle) {
 
-    if (buf == 0x01) {
-        LeftMotor->setVelocity(0);
-        MiddleMotor->setVelocity(0);
-        RightMotor->setVelocity(0);    
+    switch (buf){
+        case 0x00:
+            LeftMotor->setVelocity(0);
+            MiddleMotor->setVelocity(0);
+            RightMotor->setVelocity(0); 
+            break;
+        case 0x01:
+            LeftMotor->setVelocity(0);
+            MiddleMotor->setVelocity(0);
+            RightMotor->setVelocity(0); 
+            break;
+        case 0x02:
+            LeftMotor->setVelocity(speed);
+            MiddleMotor->setVelocity(0);
+            RightMotor->setVelocity(0); 
+            break;
+        case 0x03:
+            LeftMotor->setVelocity(0);
+            MiddleMotor->setVelocity(speed);
+            RightMotor->setVelocity(0); 
+            break;
+        case 0x04:
+            LeftMotor->setVelocity(0);
+            MiddleMotor->setVelocity(0);
+            RightMotor->setVelocity(speed); 
+            break;
     }
-
-    else if (0x02) {
+    
+    if (ToggleState) {
         LeftMotor->setVelocity(speed);
-        MiddleMotor->setVelocity(0);
-        RightMotor->setVelocity(0); 
-    }
-
-    else if (0x03) {
-        LeftMotor->setVelocity(0);
         MiddleMotor->setVelocity(speed);
-        RightMotor->setVelocity(0); 
-    }
-
-    else if (0x03) {
-        LeftMotor->setVelocity(0);
-        MiddleMotor->setVelocity(0);
         RightMotor->setVelocity(speed); 
     }
 
-    else if (ToggleState){
-        LeftMotor->setVelocity(speed);
-        MiddleMotor->setVelocity(speed);
-        RightMotor->setVelocity(speed); 
+    if (LToggle) {
+        left_was_toggled = true;
+        if (LeftMotor->getDirection() == Direction::Forward) {
+            LeftMotor->setVelocity(speed);
+            MiddleMotor->setVelocity(0);
+            RightMotor->setVelocity(0);
+        }
+        else if (LeftMotor->getDirection() == Direction::Reverse) {
+            LeftMotor->setVelocity(-speed);
+            MiddleMotor->setVelocity(0);
+            RightMotor->setVelocity(0);
+        }
     }
 
-    else {
-        LeftMotor->setVelocity(0);
-        MiddleMotor->setVelocity(0);
-        RightMotor->setVelocity(0); 
+    else if (!LToggle && left_was_toggled){
+        if (LeftMotor->getDirection() == Direction::Forward && left_was_toggled) {
+            LeftMotor->setDirection(Direction::Reverse);
+            left_was_toggled = false;
+        }
+        else if (LeftMotor->getDirection() == Direction::Reverse && left_was_toggled) {
+            LeftMotor->setDirection(Direction::Forward);
+            left_was_toggled = false;
+        }
     }
+
+    if (MToggle) {
+        middle_was_toggled = true;
+        if (MiddleMotor->getDirection() == Direction::Forward) {
+            LeftMotor->setVelocity(0);
+            MiddleMotor->setVelocity(speed);
+            RightMotor->setVelocity(0);
+        }
+        else if (MiddleMotor->getDirection() == Direction::Reverse) {
+            LeftMotor->setVelocity(0);
+            MiddleMotor->setVelocity(-speed);
+            RightMotor->setVelocity(0);
+        }
+    }
+
+    else if (!MToggle && middle_was_toggled){
+        if (MiddleMotor->getDirection() == Direction::Forward && middle_was_toggled) {
+            MiddleMotor->setDirection(Direction::Reverse);
+            middle_was_toggled = false;
+        }
+        else if (MiddleMotor->getDirection() == Direction::Reverse && middle_was_toggled) {
+            MiddleMotor->setDirection(Direction::Forward);
+            middle_was_toggled = false;
+        }
+    }
+
+    if (RToggle) {
+        right_was_toggled = true;
+        if (RightMotor->getDirection() == Direction::Forward) {
+            LeftMotor->setVelocity(0);
+            MiddleMotor->setVelocity(0);
+            RightMotor->setVelocity(speed);
+        }
+        else if (RightMotor->getDirection() == Direction::Reverse) {
+            LeftMotor->setVelocity(0);
+            MiddleMotor->setVelocity(0);
+            RightMotor->setVelocity(-speed);
+        }
+    }
+
+    else if (!RToggle && right_was_toggled){
+        if (RightMotor->getDirection() == Direction::Forward && right_was_toggled) {
+            RightMotor->setDirection(Direction::Reverse);
+            right_was_toggled = false;
+        }
+        else if (RightMotor->getDirection() == Direction::Reverse && right_was_toggled) {
+            RightMotor->setDirection(Direction::Forward);
+            right_was_toggled = false;
+        }
+    }
+
 }

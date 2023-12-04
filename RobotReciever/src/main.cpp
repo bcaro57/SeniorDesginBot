@@ -30,10 +30,10 @@ MotorControl ActuatorController(&LeftActuator, &MiddleActuator, &RightActuator);
 
 
 // Instances of the data handling objects
-DataInfo DriveToggle(0x01);
-DataInfo LeftActuatorToggle(0x02);
-DataInfo MiddleActuatorToggle(0x03);
-DataInfo RightActuatorToggle(0x04);
+DataInfo DriveData;
+DataInfo LeftActuatorToggle;
+DataInfo MiddleActuatorToggle;
+DataInfo RightActuatorToggle;
 
 
 // Defining the length of data being recieved (how many bytes)
@@ -68,14 +68,31 @@ void loop() {
 
     if(rf95.recv(buf, &len)) {
       // setting the button toggle variable
-      // bool MotorToggle = DriveToggle.ButtonToggle();
+      bool MotorToggle = DriveData.ButtonToggle(buf[0], 0x01);
+      bool LToggle = LeftActuatorToggle.ButtonToggle(buf[1], 0x02);
+      bool MToggle = MiddleActuatorToggle.ButtonToggle(buf[1], 0x03);
+      bool RToggle = RightActuatorToggle.ButtonToggle(buf[1], 0x04);
+
+      int DriveSpeed = DriveData.MapValue(buf[2]);
 
       // updating each controller
-      Led.update(buf[0], true);
-      DriveController.setSpeed(buf[2]);
-      DriveController.update(buf[0], true);
-      ActuatorController.update(buf[1], true);
+      Led.update(buf[0], MotorToggle);
+      Led.update(buf[1], MotorToggle);
+      DriveController.setSpeed(DriveSpeed);
+      // Serial.print("index 0 is ");
+      // Serial.print(buf[0]);
+      // Serial.print(" index 1 is ");
+      // Serial.print(buf[1]);
+      // Serial.print(" index 2 is ");
+      // Serial.print(DriveSpeed);
+      // Serial.print(" motorstate is ");
+      // Serial.println(MotorToggle);
+      DriveController.update(buf[0], MotorToggle);
+      Serial.print("LToggle value is ");
+      Serial.println(LToggle);
+      ActuatorController.update(buf[1], false, LToggle, MToggle, RToggle);
     }
+
     else {
       Serial.println("Receive failed");
     }
