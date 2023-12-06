@@ -18,8 +18,8 @@ MotorDriver LeftActuator(L_ACTUATOR_LPWM, L_ACTUATOR_RPWM);
 MotorDriver MiddleActuator(M_ACTUATOR_LPWM, M_ACTUATOR_RPWM);
 MotorDriver RightActuator(R_ACTUATOR_LPWM, R_ACTUATOR_RPWM);
 
-// Encoder * Encoder::instances [3] = { NULL, NULL, NULL };
-// Encoder LeftEncoder(L_ENCODER_A, L_ENCODER_B);
+Encoder * Encoder::instances [3] = { NULL, NULL, NULL };
+Encoder LeftEncoder(L_ENCODER_A, L_ENCODER_B);
 // Encoder MiddleEncoder(M_ENCODER_A, M_ENCODER_B);
 // Encoder RightEncoder(R_ENCODER_A, R_ENCODER_B);
 
@@ -56,6 +56,7 @@ void setup() {
   Led.init();
   DriveController.init(); 
   ActuatorController.init();
+  LeftEncoder.init();
 }
 
 
@@ -79,17 +80,13 @@ void loop() {
       Led.update(buf[0], MotorToggle);
       Led.update(buf[1], MotorToggle);
       DriveController.setSpeed(DriveSpeed);
-      // Serial.print("index 0 is ");
-      // Serial.print(buf[0]);
-      // Serial.print(" index 1 is ");
-      // Serial.print(buf[1]);
-      // Serial.print(" index 2 is ");
-      // Serial.print(DriveSpeed);
-      // Serial.print(" motorstate is ");
-      // Serial.println(MotorToggle);
+
+      Serial.print("Encoder position is ");
+      Serial.println(LeftEncoder.getPosition());
+      Serial.print("Encoder velocity is ");
+      Serial.println(LeftEncoder.getVelocity());
+
       DriveController.update(buf[0], MotorToggle);
-      Serial.print("LToggle value is ");
-      Serial.println(LToggle);
       ActuatorController.update(buf[1], false, LToggle, MToggle, RToggle);
     }
 

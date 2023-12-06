@@ -83,7 +83,7 @@ Encoder class constructor and methods (described in MotorHandler.h file)
 
 */
 
-Encoder::Encoder(int _pulse_a, int _pulse_b, Adafruit_MCP23X17* _mcp = NULL): pulseA(_pulse_a),
+Encoder::Encoder(int _pulse_a, int _pulse_b, Adafruit_MCP23X17* _mcp): pulseA(_pulse_a),
                                                                               pulseB(_pulse_b),
                                                                               MCP(_mcp)
 {}
@@ -116,7 +116,7 @@ void Encoder::wheelSpeed() {
 
 void Encoder::init(){
 
-    Direction direction = Direction::Forward;
+    direction = Direction::Forward;
     switch(pulseA) {
         case L_ENCODER_A:
             pinMode(pulseB, INPUT);
@@ -144,7 +144,9 @@ long Encoder::getPosition() {
 
 
 int Encoder::getVelocity() {
-    return velocity;
+    int true_vel = velocity;
+    velocity = 0;
+    return true_vel;
 }
 
 
