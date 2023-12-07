@@ -29,10 +29,11 @@ the expander should be specifically notified as expander pins and which ones the
 // For the encoders - all fake values right now, will need interrupt pins for A and normal pins for B
 #define L_ENCODER_A 1
 #define L_ENCODER_B 13
-#define M_ENCODER_A 14
-#define M_ENCODER_B 15
-#define R_ENCODER_A 16
-#define R_ENCODER_B 17
+#define M_ENCODER_A 0
+#define M_ENCODER_B 3
+#define R_ENCODER_A 0
+#define R_ENCODER_B 4
+
 
 
 // For the linear actuator motors

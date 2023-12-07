@@ -207,6 +207,39 @@ class LED {
     Adafruit_MCP23X17* MCP;
 };
 
+class InductiveSensor {
+
+  InductiveSensor(int _sensor_pin, Adafruit_MCP23X17* _mcp = NULL):SensorPin(_sensor_pin),
+                                                                   MCP(_mcp)
+  {}
+
+  public:
+    void init(){
+      if (!MCP){
+        pinMode(SensorPin, INPUT);
+      }
+      else{
+        MCP->pinMode(SensorPin, INPUT);
+      }
+    }
+
+    int getSensorValue(){
+      if (!MCP){
+        SensorVal = digitalRead(SensorPin);
+      }
+      else{
+        SensorVal = MCP->digitalRead(SensorPin);
+      }
+
+      return SensorVal;
+    }
+
+  private:
+    int SensorPin;
+    int SensorVal;
+
+    Adafruit_MCP23X17* MCP;
+};
 
 
 #endif

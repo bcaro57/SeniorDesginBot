@@ -83,33 +83,58 @@ Encoder class constructor and methods (described in MotorHandler.h file)
 
 */
 
-Encoder::Encoder(int _pulse_a, int _pulse_b, Adafruit_MCP23X17* _mcp): pulseA(_pulse_a),
-                                                                              pulseB(_pulse_b),
-                                                                              MCP(_mcp)
+Encoder::Encoder(pulsePin _pin_loc, int _pulse_a, int _pulse_b, Adafruit_MCP23X17* _mcp): pinLoc(_pin_loc),
+                                                                                          pulseA(_pulse_a),
+                                                                                          pulseB(_pulse_b),
+                                                                                          MCP(_mcp)
 {}
 
 
 void Encoder::wheelSpeed() {
-    int Lstate = digitalRead(pulseA);   
-    if((encoder0PinALast == LOW) && Lstate==HIGH) {     
-        int val = digitalRead(pulseB);     
-        if(val == LOW && direction == Direction::Forward) {       
-            direction = Direction::Reverse; //Reverse     
-        }     
-        else if(val == HIGH && direction == Direction::Reverse) {       
-            direction = Direction::Forward;  //Forward     
-        }  
-    }   
-    encoder0PinALast = Lstate;     
+    if (pinLoc != pulsePin::mcp0){ 
+        int Lstate = digitalRead(pulseA);   
+        if((encoder0PinALast == LOW) && Lstate==HIGH) {     
+            int val = MCP->digitalRead(pulseB);     
+            if(val == LOW && direction == Direction::Forward) {       
+                direction = Direction::Reverse; //Reverse     
+            }     
+            else if(val == HIGH && direction == Direction::Reverse) {       
+                direction = Direction::Forward;  //Forward     
+            }  
+        }   
+        encoder0PinALast = Lstate;     
 
-    if(direction == Direction::Reverse) { 
-        velocity++; 
-        position++;   
+        if(direction == Direction::Reverse) { 
+            velocity++; 
+            position++;   
+        }
+        else {
+            velocity--;
+            position--;
+        } 
     }
     else {
-        velocity--;
-        position--;
-    } 
+        int Lstate = MCP->getCapturedInterrupt();   
+        if((encoder0PinALast == LOW) && Lstate==HIGH) {     
+            int val = MCP->digitalRead(pulseB);     
+            if(val == LOW && direction == Direction::Forward) {       
+                direction = Direction::Reverse; //Reverse     
+            }     
+            else if(val == HIGH && direction == Direction::Reverse) {       
+                direction = Direction::Forward;  //Forward     
+            }  
+        }   
+        encoder0PinALast = Lstate;     
+
+        if(direction == Direction::Reverse) { 
+            velocity++; 
+            position++;   
+        }
+        else {
+            velocity--;
+            position--;
+        } 
+    }
 
 }
 
@@ -117,20 +142,21 @@ void Encoder::wheelSpeed() {
 void Encoder::init(){
 
     direction = Direction::Forward;
-    switch(pulseA) {
-        case L_ENCODER_A:
-            pinMode(pulseB, INPUT);
-            attachInterrupt(digitalPinToInterrupt(pulseA), wheelSpeedExt0, CHANGE);
+    switch(pinLoc) {
+        case pulsePin::feather0:
+            MCP->pinMode(pulseB, INPUT);
+            attachInterrupt(digitalPinToInterrupt(L_ENCODER_A), wheelSpeedExt0, CHANGE);
             instances[0] = this;
             break;
-        case M_ENCODER_A:
-            pinMode(pulseB, INPUT);
-            attachInterrupt(digitalPinToInterrupt(pulseA), wheelSpeedExt1, CHANGE);
+        case pulsePin::feather1:
+            MCP->pinMode(pulseB, INPUT);
+            // attachInterrupt(digitalPinToInterrupt(pulseA), wheelSpeedExt1, CHANGE);
+            MCP->setupInterruptPin(M_ENCODER_A, CHANGE);
             instances[1] = this;
             break;
-        case R_ENCODER_A:
+        case pulsePin::mcp0:
             pinMode(pulseB, INPUT);
-            attachInterrupt(digitalPinToInterrupt(pulseA), wheelSpeedExt2, CHANGE);
+            attachInterrupt(digitalPinToInterrupt(R_ENCODER_A), wheelSpeedExt2, CHANGE);
             instances[2] = this;
             break;
     }

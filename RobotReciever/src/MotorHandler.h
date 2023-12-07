@@ -145,7 +145,14 @@ variables:
     MCP                 -> the IO expansion board object
 */
 
+enum class pulsePin{
+        feather0,
+        feather1,
+        mcp0
+};
+
 class Encoder{
+
     int encoder0PinALast;
     int velocity;
     long position;
@@ -169,7 +176,7 @@ class Encoder{
     }
 
     public:
-        Encoder(int _pulse_a, int _pulse_b, Adafruit_MCP23X17* _mcp = NULL);
+        Encoder(pulsePin _pin_loc, int _pulse_a, int _pulse_b, Adafruit_MCP23X17* _mcp = NULL);
 
         void wheelSpeed();
 
@@ -177,6 +184,7 @@ class Encoder{
         long getPosition();
         int getVelocity();
     private:
+        pulsePin pinLoc;
         int pulseA;
         int pulseB;
         Direction direction;

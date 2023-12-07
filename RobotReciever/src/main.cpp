@@ -5,7 +5,6 @@
 #include "PeripheralHandler.h"
 #include "pindefs.h"
 
-
 // Instances of all motors/peripherals
 Adafruit_MCP23X17 mcp;
 LED Led(GREEN_LED_PIN, LEFT_LED_PIN, MIDDLE_LED_PIN, RIGHT_LED_PIN, &mcp);
@@ -19,9 +18,9 @@ MotorDriver MiddleActuator(M_ACTUATOR_LPWM, M_ACTUATOR_RPWM);
 MotorDriver RightActuator(R_ACTUATOR_LPWM, R_ACTUATOR_RPWM);
 
 Encoder * Encoder::instances [3] = { NULL, NULL, NULL };
-Encoder LeftEncoder(L_ENCODER_A, L_ENCODER_B);
-// Encoder MiddleEncoder(M_ENCODER_A, M_ENCODER_B);
-// Encoder RightEncoder(R_ENCODER_A, R_ENCODER_B);
+Encoder LeftEncoder(pulsePin::feather0, L_ENCODER_A, L_ENCODER_B, &mcp);
+Encoder MiddleEncoder(pulsePin::feather1, M_ENCODER_A, M_ENCODER_B, &mcp);
+Encoder RightEncoder(pulsePin::mcp0, R_ENCODER_A, R_ENCODER_B, &mcp);
 
 
 // Instances of higher level controller for drive motors and actuators
@@ -50,6 +49,8 @@ The bytes of data recieved are used in the following manner:
 */
 
 void setup() {
+  mcp.setupInterrupts(true, false, LOW);
+
   Serial.begin(115200);
   mcpInit(&mcp);
   RadioInit();
@@ -57,6 +58,8 @@ void setup() {
   DriveController.init(); 
   ActuatorController.init();
   LeftEncoder.init();
+  MiddleEncoder.init();
+  RightEncoder.init();
 }
 
 
@@ -81,10 +84,18 @@ void loop() {
       Led.update(buf[1], MotorToggle);
       DriveController.setSpeed(DriveSpeed);
 
-      Serial.print("Encoder position is ");
-      Serial.println(LeftEncoder.getPosition());
-      Serial.print("Encoder velocity is ");
-      Serial.println(LeftEncoder.getVelocity());
+        Serial.print("Left encoder position is ");
+      Serial.print(LeftEncoder.getPosition());
+      Serial.print(" and velocity is ");
+      Serial.print(LeftEncoder.getVelocity());
+      //       Serial.print("      Middle encoder position is ");
+      // Serial.print(MiddleEncoder.getPosition());
+      // Serial.print(" and velocity is ");
+      // Serial.print(MiddleEncoder.getVelocity());
+      //       Serial.print("      Right encoder position is ");
+      // Serial.print(RightEncoder.getPosition());
+      // Serial.print(" and velocity is ");
+      // Serial.println(RightEncoder.getVelocity());
 
       DriveController.update(buf[0], MotorToggle);
       ActuatorController.update(buf[1], false, LToggle, MToggle, RToggle);
