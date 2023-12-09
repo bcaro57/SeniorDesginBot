@@ -1,25 +1,8 @@
 #include <Arduino.h>
 #include <Adafruit_MCP23X17.h>
+
 #include "MotorHandler.h"
 #include "pindefs.h"
-
-/*
-
-
-MotorClosedLoop constructor and methods (described in MotorHandler.h file)
-
-
-*/
-
-// MotorClosedLoop::MotorClosedLoop(MotorDriver* _motor, Encoder* _encoder): Motor(_motor),
-//                                                                           MotorEncoder(_encoder)
-// {}
-
-
-// void MotorClosedLoop::init() {
-//     Motor->init();
-//     MotorEncoder->init();
-// }
 
 
 /*
@@ -30,17 +13,26 @@ MotorDriver constructor and methods (described in MotorHandler.h file)
 
 */
 
-MotorDriver::MotorDriver(int _lpwm, int _rpwm): LPWM(_lpwm),
-                                                RPWM(_rpwm)
+MotorDriver::MotorDriver(int _lpwm, int _rpwm, Adafruit_MCP23X17* _mcp): LPWM(_lpwm),
+                                                                         RPWM(_rpwm),
+                                                                         MCP(_mcp)
 {}
 
 
 void MotorDriver::init() {
-
-    pinMode(LPWM, OUTPUT);
-    pinMode(RPWM, OUTPUT);
-    analogWrite(LPWM, 0);
-    analogWrite(RPWM, 0);
+    
+    if (!MCP) {
+        pinMode(LPWM, OUTPUT);
+        pinMode(RPWM, OUTPUT);
+        analogWrite(LPWM, 0);
+        analogWrite(RPWM, 0);
+    }
+    else {
+        MCP->pinMode(LPWM, OUTPUT);
+        MCP->pinMode(RPWM, OUTPUT);
+        MCP->digitalWrite(LPWM, 0);
+        MCP->digitalWrite(RPWM, 0);
+    }
 }
 
 
@@ -57,21 +49,77 @@ float MotorDriver::setSpeed(int percentage) {
 
 
 void MotorDriver::setVelocity(int percentage) {
-
-    if (percentage >= 0) {
-        // setDirection(Direction::Forward);
-        analogWrite(RPWM, setSpeed(abs(percentage)));
-        analogWrite(LPWM, 0);
+    
+    if (!MCP) {
+        if (percentage >= 0) {
+            // setDirection(Direction::Forward);
+            analogWrite(RPWM, setSpeed(abs(percentage)));
+            analogWrite(LPWM, 0);
+        }
+        else {
+            // setDirection(Direction::Reverse);
+            analogWrite(RPWM, 0);
+            analogWrite(LPWM, setSpeed(abs(percentage)));
+        }
     }
     else {
-        // setDirection(Direction::Reverse);
-        analogWrite(RPWM, 0);
-        analogWrite(LPWM, setSpeed(abs(percentage)));
+        if (percentage >= 0) {
+            // setDirection(Direction::Forward);
+            MCP->digitalWrite(RPWM, 1);
+            MCP->digitalWrite(LPWM, 0);
+        }
+        else {
+            // setDirection(Direction::Reverse);
+            MCP->digitalWrite(RPWM, 0);
+            MCP->digitalWrite(LPWM, 1);
+        }
     }
 }
 
+
 Direction MotorDriver::getDirection() {
     return current_direction;
+}
+
+
+/*
+
+
+StepperDriver constructor and methods (described in MotorHandler.h file)
+
+
+*/
+
+
+StepperDriver::StepperDriver(int _pulse_pin, int _dir_pin, int _sensor_pin, Adafruit_MCP23X17* _mcp): pulsePin(_pulse_pin),
+                                                                                                      dirPin(_dir_pin),
+                                                                                                      sensorPin(_sensor_pin),
+                                                                                                      MCP(_mcp)
+{}
+
+
+void StepperDriver::init() {
+    pinMode(pulsePin, OUTPUT);
+    pinMode(dirPin, OUTPUT);
+    digitalWrite(dirPin, HIGH);
+
+    // if (MCP->digitalRead(sensorPin) == LOW && !calibrated) {
+    // for (int i; i<300; i++) { 
+    //     MCP->digitalWrite(pulsePin, HIGH);
+    //     delayMicroseconds(500);
+    //     MCP->digitalWrite(pulsePin, LOW);
+    //     delayMicroseconds(500);
+    // }
+}
+
+
+void StepperDriver::movePosition() {
+    
+    digitalWrite(pulsePin, HIGH);
+    delayMicroseconds(500);
+    digitalWrite(pulsePin, LOW);
+    delayMicroseconds(500);
+
 }
 
 
@@ -91,8 +139,8 @@ Encoder::Encoder(pulsePin _pin_loc, int _pulse_a, int _pulse_b, Adafruit_MCP23X1
 
 
 void Encoder::wheelSpeed() {
-    if (pinLoc != pulsePin::mcp0){ 
-        int Lstate = digitalRead(pulseA);   
+    if (pinLoc == pulsePin::mcp0){ 
+        int Lstate = MCP->getCapturedInterrupt();   
         if((encoder0PinALast == LOW) && Lstate==HIGH) {     
             int val = MCP->digitalRead(pulseB);     
             if(val == LOW && direction == Direction::Forward) {       
@@ -114,7 +162,7 @@ void Encoder::wheelSpeed() {
         } 
     }
     else {
-        int Lstate = MCP->getCapturedInterrupt();   
+        int Lstate = digitalRead(pulseA);   
         if((encoder0PinALast == LOW) && Lstate==HIGH) {     
             int val = MCP->digitalRead(pulseB);     
             if(val == LOW && direction == Direction::Forward) {       
@@ -143,22 +191,26 @@ void Encoder::init(){
 
     direction = Direction::Forward;
     switch(pinLoc) {
+        
         case pulsePin::feather0:
             MCP->pinMode(pulseB, INPUT);
             attachInterrupt(digitalPinToInterrupt(L_ENCODER_A), wheelSpeedExt0, CHANGE);
             instances[0] = this;
             break;
+
         case pulsePin::feather1:
             MCP->pinMode(pulseB, INPUT);
             // attachInterrupt(digitalPinToInterrupt(pulseA), wheelSpeedExt1, CHANGE);
             MCP->setupInterruptPin(M_ENCODER_A, CHANGE);
             instances[1] = this;
             break;
+
         case pulsePin::mcp0:
-            pinMode(pulseB, INPUT);
+            MCP->pinMode(pulseB, INPUT);
             attachInterrupt(digitalPinToInterrupt(R_ENCODER_A), wheelSpeedExt2, CHANGE);
             instances[2] = this;
             break;
+
     }
     
 }
@@ -179,18 +231,85 @@ int Encoder::getVelocity() {
 /*
 
 
-MotorControl constructor and methods (described in MotorHandler.h file)
+MotorClosedLoop constructor and methods (described in MotorHandler.h file)
 
 
 */
 
-MotorControl::MotorControl(MotorDriver* _LeftMotor, MotorDriver* _MiddleMotor, MotorDriver* _RightMotor): LeftMotor(_LeftMotor),
+// MotorClosedLoop::MotorClosedLoop(MotorDriver* _motor, Encoder* _encoder): Motor(_motor),
+//                                                                           MotorEncoder(_encoder)
+// {}
+
+
+// void MotorClosedLoop::init() {
+//     Motor->init();
+//     MotorEncoder->init();
+// }
+
+
+/*
+
+
+DriveControl constructor and methods (described in MotorHandler.h file)
+
+
+*/
+
+DriveControl::DriveControl(MotorDriver* _LeftMotor, MotorDriver* _MiddleMotor, MotorDriver* _RightMotor): LeftMotor(_LeftMotor),
                                                                                                           MiddleMotor(_MiddleMotor),
                                                                                                           RightMotor(_RightMotor)
 {}
 
 
-void MotorControl::init() {
+void DriveControl::init() {
+
+    LeftMotor->init();
+    MiddleMotor->init();
+    RightMotor->init();
+
+    LeftMotor->setVelocity(0);
+    MiddleMotor->setVelocity(0);
+    RightMotor->setVelocity(0);
+
+    setSpeed(100);
+}
+
+
+void DriveControl::setSpeed(int percent) {
+    
+    speed = percent;
+}
+
+
+void DriveControl::update(uint8_t buf, bool ToggleState) {
+
+  
+    if (ToggleState) {
+        LeftMotor->setVelocity(speed);
+        MiddleMotor->setVelocity(speed);
+        RightMotor->setVelocity(speed); 
+    }
+
+}
+
+
+/*
+
+
+ActuatorControl constructor and methods (described in MotorHandler.h file)
+
+
+*/
+
+ActuatorControl::ActuatorControl(MotorDriver* _left_motor, MotorDriver* _middle_motor, MotorDriver* _right_motor, StepperDriver* _dynamic_balancer, Adafruit_MCP23X17* _mcp): LeftMotor(_left_motor),
+                                                                                                                                                                              MiddleMotor(_middle_motor),
+                                                                                                                                                                              RightMotor(_right_motor),
+                                                                                                                                                                              DynamicBalancer(_dynamic_balancer),
+                                                                                                                                                                              MCP(_mcp)
+{}
+
+
+void ActuatorControl::init() {
 
     LeftMotor->init();
     MiddleMotor->init();
@@ -205,50 +324,17 @@ void MotorControl::init() {
     right_was_toggled = false;
 
     setSpeed(100);
+
+    DynamicBalancer->init();
 }
 
 
-void MotorControl::setSpeed(int percent) {
+void ActuatorControl::setSpeed(int percent) {
     
     speed = percent;
 }
 
-
-void MotorControl::update(uint8_t buf, bool ToggleState, bool LToggle, bool MToggle, bool RToggle) {
-
-    switch (buf){
-        case 0x00:
-            LeftMotor->setVelocity(0);
-            MiddleMotor->setVelocity(0);
-            RightMotor->setVelocity(0); 
-            break;
-        case 0x01:
-            LeftMotor->setVelocity(0);
-            MiddleMotor->setVelocity(0);
-            RightMotor->setVelocity(0); 
-            break;
-        case 0x02:
-            LeftMotor->setVelocity(speed);
-            MiddleMotor->setVelocity(0);
-            RightMotor->setVelocity(0); 
-            break;
-        case 0x03:
-            LeftMotor->setVelocity(0);
-            MiddleMotor->setVelocity(speed);
-            RightMotor->setVelocity(0); 
-            break;
-        case 0x04:
-            LeftMotor->setVelocity(0);
-            MiddleMotor->setVelocity(0);
-            RightMotor->setVelocity(speed); 
-            break;
-    }
-    
-    if (ToggleState) {
-        LeftMotor->setVelocity(speed);
-        MiddleMotor->setVelocity(speed);
-        RightMotor->setVelocity(speed); 
-    }
+void ActuatorControl::update(uint8_t buf, bool LToggle, bool MToggle, bool RToggle) {
 
     if (LToggle) {
         left_was_toggled = true;
@@ -326,3 +412,4 @@ void MotorControl::update(uint8_t buf, bool ToggleState, bool LToggle, bool MTog
     }
 
 }
+

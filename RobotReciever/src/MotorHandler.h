@@ -3,32 +3,6 @@
 
 
 /*
-** currently under construction **
-MotorClosedLoop - designed for closed loop motor control
-
-inputs into constructor: a motor and an associated encoder
-
-methods:
-    init()              -> initializes the motor and encoder objects
-
-variables:
-    Motor               -> the motor in question
-    MotorEncoder        -> the encoder in question
-*/
-
-// class MotorClosedLoop{
-//     public:
-//         MotorClosedLoop(MotorDriver* _motor, Encoder* _encoder);
-
-//         void init();
-
-//     private:
-//         MotorDriver* Motor;
-//         Encoder* MotorEncoder;
-// };
-
-
-/*
 Direction - allows us to keep track of if the direction of a given object is forward or reversed
 */
 
@@ -57,10 +31,11 @@ variables:
     current_direction   -> the current direction of the motor
 */
 
+
 class MotorDriver{
 
     public:
-        MotorDriver(int _lpwm, int _rpwm);
+        MotorDriver(int _lpwm, int _rpwm, Adafruit_MCP23X17* _mcp = NULL);
 
         void init();
         void setDirection(Direction dir);
@@ -70,52 +45,42 @@ class MotorDriver{
     private:
 
         int LPWM;
-        int RPWM;
+        int RPWM; 
         int speed;
 
         Direction current_direction;
+        Adafruit_MCP23X17* MCP;
+};
+
+
+class StepperDriver{
+
+    public:
+        StepperDriver(int _pulse_pin, int _dir_pin, int _sensor_pin, Adafruit_MCP23X17* _mcp);
+
+        void init();
+        void movePosition();
+
+    private:
+        int pulsePin;
+        int dirPin;
+        int sensorPin;
+        bool calibrated;
+        
+        Adafruit_MCP23X17* MCP;
+
 };
 
 
 /*
-MotorControl - designed to control all of the robots motors
-
-inputs into constructor: each of the motors (left, middle, and right motors)
-                         can be used for any set of three motors, so we use it 
-                         for the drive motors and the actuator arms
-
-methods:
-    init()              -> initializes all of the motors, and sets their velocity to 0. also sets our speed variable to 0
-    setSpeed()          -> sets the private speed variable to whatever value we give it (should be a percent -100 to 100)
-    update()            -> sets the motors based on the given buffer
-
-variables:
-    LeftMotor           -> object of the left motor
-    MiddleMotor         -> object of the middle motor
-    RightMotor          -> object of the right motor
-    speed               -> the desired analog speed of the motors
+pulsePin - allows us to keep track of if the interrupt pins, specifying the pin used and the 
 */
 
-class MotorControl{
 
-    public:
-        MotorControl(MotorDriver* _LeftMotor, MotorDriver* _MiddleMotor, MotorDriver* _RightMotor);
-
-        void init();
-        void setSpeed(int percent);
-        void update(uint8_t buf, bool ToggleState = false, bool LToggle = false, bool MToggle = false, bool RToggle = false);
-    private:
-
-        MotorDriver* LeftMotor;
-        MotorDriver* MiddleMotor;
-        MotorDriver* RightMotor;
-
-        int speed;
-        bool left_was_toggled;
-        bool middle_was_toggled;
-        bool right_was_toggled;
-
-
+enum class pulsePin{
+        feather0,
+        feather1,
+        mcp0
 };
 
 
@@ -145,11 +110,6 @@ variables:
     MCP                 -> the IO expansion board object
 */
 
-enum class pulsePin{
-        feather0,
-        feather1,
-        mcp0
-};
 
 class Encoder{
 
@@ -190,6 +150,98 @@ class Encoder{
         Direction direction;
         Adafruit_MCP23X17* MCP;
 };
+
+
+/*
+DriveControl - designed to control all of the robots motors
+
+inputs into constructor: each of the motors (left, middle, and right motors)
+                         can be used for any set of three motors, so we use it 
+                         for the drive motors and the actuator arms
+
+methods:
+    init()              -> initializes all of the motors, and sets their velocity to 0. also sets our speed variable to 0
+    setSpeed()          -> sets the private speed variable to whatever value we give it (should be a percent -100 to 100)
+    update()            -> sets the motors based on the given buffer
+
+variables:
+    LeftMotor           -> object of the left motor
+    MiddleMotor         -> object of the middle motor
+    RightMotor          -> object of the right motor
+    speed               -> the desired analog speed of the motors
+*/
+
+
+class DriveControl{
+
+    public:
+        DriveControl(MotorDriver* _LeftMotor, MotorDriver* _MiddleMotor, MotorDriver* _RightMotor);
+
+        void init();
+        void setSpeed(int percent);
+        void update(uint8_t buf, bool ToggleState = false);
+    private:
+
+        MotorDriver* LeftMotor;
+        MotorDriver* MiddleMotor;
+        MotorDriver* RightMotor;
+
+        int speed;
+
+
+};
+
+
+class ActuatorControl{
+
+    public:
+        ActuatorControl(MotorDriver* _left_motor, MotorDriver* _middle_motor, MotorDriver* _right_motor, StepperDriver* _dynamic_balancer, Adafruit_MCP23X17* _mcp);
+
+        void init();
+        void setSpeed(int percent);
+        void update(uint8_t buf, bool LToggle = false, bool MToggle = false, bool RToggle = false);
+    private:
+
+        MotorDriver* LeftMotor;
+        MotorDriver* MiddleMotor;
+        MotorDriver* RightMotor;
+        StepperDriver* DynamicBalancer;
+        Adafruit_MCP23X17* MCP;
+
+        int speed;
+        bool left_was_toggled;
+        bool middle_was_toggled;
+        bool right_was_toggled;
+
+
+};
+
+
+
+/*
+** currently under construction **
+MotorClosedLoop - designed for closed loop motor control
+
+inputs into constructor: a motor and an associated encoder
+
+methods:
+    init()              -> initializes the motor and encoder objects
+
+variables:
+    Motor               -> the motor in question
+    MotorEncoder        -> the encoder in question
+*/
+
+// class MotorClosedLoop{
+//     public:
+//         MotorClosedLoop(MotorDriver* _motor, Encoder* _encoder);
+
+//         void init();
+
+//     private:
+//         MotorDriver* Motor;
+//         Encoder* MotorEncoder;
+// };
 
 
 #endif

@@ -8,6 +8,7 @@
 // Instances of all motors/peripherals
 Adafruit_MCP23X17 mcp;
 LED Led(GREEN_LED_PIN, LEFT_LED_PIN, MIDDLE_LED_PIN, RIGHT_LED_PIN, &mcp);
+StepperDriver myStepper(STEPPER_PIN_PUL, STEPPER_PIN_DIR, LIMIT_SWITCH_PIN, NULL);
 
 MotorDriver LeftMotor(L_MOTOR_LPWM, L_MOTOR_RPWM);
 MotorDriver MiddleMotor(M_MOTOR_LPWM, M_MOTOR_RPWM);
@@ -24,8 +25,8 @@ Encoder RightEncoder(pulsePin::mcp0, R_ENCODER_A, R_ENCODER_B, &mcp);
 
 
 // Instances of higher level controller for drive motors and actuators
-MotorControl DriveController(&LeftMotor, &MiddleMotor, &RightMotor);
-MotorControl ActuatorController(&LeftActuator, &MiddleActuator, &RightActuator);
+DriveControl DriveController(&LeftMotor, &MiddleMotor, &RightMotor);
+ActuatorControl ActuatorController(&LeftActuator, &MiddleActuator, &RightActuator, &myStepper, &mcp);
 
 
 // Instances of the data handling objects
@@ -49,7 +50,7 @@ The bytes of data recieved are used in the following manner:
 */
 
 void setup() {
-  mcp.setupInterrupts(true, false, LOW);
+  // mcp.setupInterrupts(true, false, LOW);
 
   Serial.begin(115200);
   mcpInit(&mcp);
@@ -57,13 +58,16 @@ void setup() {
   Led.init();
   DriveController.init(); 
   ActuatorController.init();
-  LeftEncoder.init();
-  MiddleEncoder.init();
-  RightEncoder.init();
+  // myStepper.init();
+  // LeftEncoder.init();
+  // MiddleEncoder.init();
+  // RightEncoder.init();
+  Serial.println("setup is good!");
 }
 
 
 void loop() {
+  // myStepper.movePosition();
 
   if(rf95.available()) {
 
@@ -84,10 +88,10 @@ void loop() {
       Led.update(buf[1], MotorToggle);
       DriveController.setSpeed(DriveSpeed);
 
-        Serial.print("Left encoder position is ");
-      Serial.print(LeftEncoder.getPosition());
-      Serial.print(" and velocity is ");
-      Serial.print(LeftEncoder.getVelocity());
+      //   Serial.print("Left encoder position is ");
+      // Serial.print(LeftEncoder.getPosition());
+      // Serial.print(" and velocity is ");
+      // Serial.println(LeftEncoder.getVelocity());
       //       Serial.print("      Middle encoder position is ");
       // Serial.print(MiddleEncoder.getPosition());
       // Serial.print(" and velocity is ");
@@ -98,7 +102,21 @@ void loop() {
       // Serial.println(RightEncoder.getVelocity());
 
       DriveController.update(buf[0], MotorToggle);
-      ActuatorController.update(buf[1], false, LToggle, MToggle, RToggle);
+      ActuatorController.update(buf[1], LToggle, MToggle, RToggle);
+
+      Serial.print("The Motor Toggle State is: ");
+      Serial.print(MotorToggle);
+      Serial.print(", LToggle is: ");
+      Serial.print(LToggle);
+      Serial.print(", MToggle is: ");
+      Serial.print(MToggle);
+      Serial.print(", RToggle is: ");
+      Serial.print(RToggle);
+
+      Serial.print(", the joystick says: ");
+      Serial.println(DriveSpeed);
+
+
     }
 
     else {
