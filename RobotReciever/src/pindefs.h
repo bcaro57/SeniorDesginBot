@@ -44,9 +44,8 @@ the expander should be specifically notified as expander pins and which ones the
 #define R_ACTUATOR_RPWM 15      // expander pin B7
 
 
-#define STEPPER_PIN_DIR 12       // expander pin B0
-#define STEPPER_PIN_PUL 11       // expander pin B1
+#define STEPPER_PIN_PUL 11       
+#define STEPPER_PIN_DIR 12       
+#define LIMIT_SWITCH_PIN 10       
 
-#define LIMIT_SWITCH_PIN 3      // expander pin A3
- 
 #endif

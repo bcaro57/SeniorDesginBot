@@ -18,7 +18,7 @@ RH_RF95 rf95(RFM95_CS, RFM95_INT);
 #define BUTTON_MIDDLE 10
 #define BUTTON_RIGHT 12
 #define BUTTON_BOTTOM 11
-#define JOYSTICK A5
+#define JOYSTICK A1
 
 // LED pins
 #define LED_RED 6
@@ -26,10 +26,11 @@ RH_RF95 rf95(RFM95_CS, RFM95_INT);
 #define LED_BLUE 3
 
 // misc variables
-int delayTime = 10;   // length of the delay (10ms)
-int bufLen = 3;       // length of the buffer (3 bytes of data)
-int joystickNeutral;  // a variable for the joystick to have a deadzone (so that it has a larger "stopped" radius)
-int deadzone = 10;    // the deadzone value set for calibrating the center
+int delayTime = 100;         // length of the button debounce (100ms)
+int bufLen = 3;             // length of the buffer (3 bytes of data)
+int joystickNeutral;        // a variable for the joystick to have a deadzone (so that it has a larger "stopped" radius)
+int deadzone = 5;           // the deadzone value set for calibrating the center
+bool Toggle = false;   // 
 
 void setup() {
   // for the buttons
@@ -45,8 +46,7 @@ void setup() {
   pinMode(LED_BLUE, OUTPUT);
 
   // getting the neutral reading for calibration
-  joystickNeutral = analogRead(JOYSTICK)/4;
-  
+  joystickNeutral = analogRead(JOYSTICK);
 
   // for the radio stuff
   pinMode(RFM95_RST, OUTPUT);
@@ -89,58 +89,60 @@ void setColor(int redValue, int greenValue, int blueValue) {
 
 void loop() {
 
-  analogWrite(LED_BLUE, 0);
-  analogWrite(LED_GREEN, 0);
-  analogWrite(LED_RED, 0);
+  setColor(0,0,0);
   
+  if (Toggle){
+    setColor(100,100,50);
+  }
+
   uint8_t buf[bufLen];
   if (digitalRead(BUTTON_LEFT) == LOW ) {
-    Serial.print("The 'ALL' button is being pressed and the value is ");
-    buf[0] = 0x01;
-    setColor(255, 0, 0);
-    Serial.println(buf[0]);
+    // Serial.print("The left button is being pressed and the value is ");
+    buf[1] = 0x02;
+    setColor(0, 123, 0);
+    // Serial.println(buf[1]);
     delay(delayTime);
   }
   else if (digitalRead(BUTTON_MIDDLE) == LOW ) {
-    Serial.print("The middle button is being pressed and the value is ");
-    buf[1] = 0x02;
-    Serial.println(buf[1]);
-    setColor(0, 255, 0);
+    // Serial.print("The middle button is being pressed and the value is ");
+    buf[1] = 0x03;
+    // Serial.println(buf[1]);
+    setColor(0, 123, 0);
     delay(delayTime);
   }
   else if (digitalRead(BUTTON_RIGHT) == LOW ) {
-    Serial.print("The right button is being pressed and the value is ");
-    buf[1] = 0x03;
-    Serial.println(buf[1]);
-    setColor(0, 0, 255);
+    // Serial.print("The right button is being pressed and the value is ");
+    buf[1] = 0x04;
+    // Serial.println(buf[1]);
+    setColor(0, 123, 0);
     delay(delayTime);
   }
   else if (digitalRead(BUTTON_BOTTOM) == LOW ) {
-    Serial.print("The 'all' button is being pressed and the value is ");
-    buf[1] = 0x04;
-    Serial.println(buf[1]);
-    setColor(255, 255, 255);
+    // Serial.print("The 'all' button is being pressed and the value is ");
+    buf[0] = 0x01;
+    // Serial.println(buf[0]);
+    Toggle = !Toggle;
     delay(delayTime);
   }
   else {
-    Serial.print("The buttons are not being pressed and the value is ");
+    // Serial.print("The buttons are not being pressed and the value is ");
     buf[0] = 0x00;
     buf[1] = 0x00;
-    Serial.println(buf[0]);
+    // Serial.println(buf[0]);
     delay(delayTime);
   }
   
   int joystickVal = analogRead(JOYSTICK);   
 
   if (joystickVal >= joystickNeutral + deadzone || joystickVal <= joystickNeutral - deadzone) {
-    buf[2] = map(joystickVal, 0, 1023, 0, 255);
+    buf[2] = map(joystickVal, 0, 1023, 255, 0);
   }
   else {
     buf[2] = 128;
   }
 
-  Serial.print("The joystick value is ");
-  Serial.println(buf[2]);
+  // Serial.print("The joystick value is ");
+  // Serial.println(buf[2]);
 
   rf95.send((uint8_t *)buf, bufLen);
   rf95.waitPacketSent();

@@ -6,6 +6,7 @@
 Direction - allows us to keep track of if the direction of a given object is forward or reversed
 */
 
+
 enum class Direction{
         Forward,
         Reverse
@@ -21,14 +22,16 @@ methods:
     init()              -> initializes the pins and sets them to 0 to start
     setDirection()      -> sets current_direction to reflect the direction the motor is moving 
     setSpeed()          -> takes a percentage (i.e. from -100 to 100) and determines power needed
-    setVelocity         -> sets the pwm pins to the appropriate value using setSpeed() and chooses the approptiate 
+    setVelocity()       -> sets the pwm pins to the appropriate value using setSpeed() and chooses the approptiate 
                         direction using  setDirection()
+    getDirection()      -> returns the direction that the motor is going
 
 variables:
     LPWM                -> the left PWM pin
     RPWM                -> the right PWM pin
     speed               -> the desired analog speed of the motor
     current_direction   -> the current direction of the motor
+    MCP                 -> the IO expansion board object
 */
 
 
@@ -53,22 +56,44 @@ class MotorDriver{
 };
 
 
+/*
+StepperDriver - designed to control the stepper motor in a desired way using the AccelStepper library
+
+inputs into contructor:  the  pins for pulse and direction, as well as the limit switch sensor
+
+methods: 
+    init()              -> initializes the pins and objects, as well as calibrates the stepper motor
+    movePosition()      -> moves the weight to the corresponding position, where each position input (1, 2, or 3) 
+                        stands for the arm it needs to move to
+
+variables:
+    pulsePin            -> the pin in charge of pulses of the stepper motor
+    dirPin              -> the pin in charge of the direction of the stepper motor
+    sensorPin           -> the pin in charge of the limit switch for homing the stepper motor
+    myStepper           -> object in charge of the stepper motor, using the AccelStepper Library
+    calibrated          -> a boolean that tells us if the stepper motor has been calibrated with the limit switch or not
+    halfLength          -> the amount of steps needed for the balancer to the halfway position on the robot
+    fullLength          -> the amount of steps needed for the balancer to the full position on the robot
+
+*/
+
+
 class StepperDriver{
 
     public:
-        StepperDriver(int _pulse_pin, int _dir_pin, int _sensor_pin, Adafruit_MCP23X17* _mcp);
+        StepperDriver(int _pulse_pin, int _dir_pin, int _sensor_pin);
 
         void init();
-        void movePosition();
+        void movePosition(int targetPos);
 
     private:
         int pulsePin;
         int dirPin;
         int sensorPin;
+        AccelStepper myStepper;
         bool calibrated;
-        
-        Adafruit_MCP23X17* MCP;
-
+        int halfLength = 4500;
+        int fullLength = 8500;
 };
 
 
@@ -153,11 +178,10 @@ class Encoder{
 
 
 /*
-DriveControl - designed to control all of the robots motors
+DriveControl - designed to control all of the robots drive motors
 
 inputs into constructor: each of the motors (left, middle, and right motors)
-                         can be used for any set of three motors, so we use it 
-                         for the drive motors and the actuator arms
+                         can be used for any set of three motors
 
 methods:
     init()              -> initializes all of the motors, and sets their velocity to 0. also sets our speed variable to 0
@@ -192,6 +216,31 @@ class DriveControl{
 };
 
 
+/*
+ActuatorControl - designed to control all of the actuator motors
+
+inputs into constructor: each of the motors (left, middle, and right motors)
+                         can be used for any set of three actuators, as well as 
+                         the stepper motor and the expander board.
+
+methods:
+    init()              -> initializes all of the motors, and sets their velocity to 0. also sets our speed variable to 0
+    setSpeed()          -> sets the private speed variable to whatever value we give it (should be a percent -100 to 100)
+    update()            -> sets the motors based on the given buffer
+
+variables:
+    LeftMotor           -> object of the left motor
+    MiddleMotor         -> object of the middle motor
+    RightMotor          -> object of the right motor
+    DynamicBalancer     -> object of the stepper motor for the balancer
+    speed               -> the desired analog speed of the motors
+    left_was_toggled    -> shows if the left motor button was toggled
+    middle_was_toggled  -> shows if the left motor button was toggled
+    right_was_toggled   -> shows if the left motor button was toggled
+
+*/
+
+
 class ActuatorControl{
 
     public:
@@ -199,7 +248,7 @@ class ActuatorControl{
 
         void init();
         void setSpeed(int percent);
-        void update(uint8_t buf, bool LToggle = false, bool MToggle = false, bool RToggle = false);
+        void update(uint8_t buf);
     private:
 
         MotorDriver* LeftMotor;
@@ -209,13 +258,13 @@ class ActuatorControl{
         Adafruit_MCP23X17* MCP;
 
         int speed;
-        bool left_was_toggled;
-        bool middle_was_toggled;
-        bool right_was_toggled;
 
+        unsigned long LeftEventTime;
+        unsigned long MiddleEventTime;
+        unsigned long RightEventTime;
 
+        int waitTime = 2000;
 };
-
 
 
 /*
@@ -232,16 +281,16 @@ variables:
     MotorEncoder        -> the encoder in question
 */
 
-// class MotorClosedLoop{
-//     public:
-//         MotorClosedLoop(MotorDriver* _motor, Encoder* _encoder);
+class MotorClosedLoop{
+    public:
+        MotorClosedLoop(MotorDriver* _motor, Encoder* _encoder);
 
-//         void init();
+        void init();
 
-//     private:
-//         MotorDriver* Motor;
-//         Encoder* MotorEncoder;
-// };
+    private:
+        MotorDriver* Motor;
+        Encoder* MotorEncoder;
+};
 
 
 #endif
