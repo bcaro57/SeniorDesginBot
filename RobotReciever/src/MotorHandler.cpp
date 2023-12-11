@@ -114,6 +114,7 @@ void StepperDriver::init() {
 }
 void StepperDriver::movePosition(int targetPos) {
     myStepper.run();
+    
 
     if (!calibrated){
         return;
@@ -283,18 +284,9 @@ void DriveControl::setSpeed(int percent) {
 }
 void DriveControl::update(uint8_t buf, bool ToggleState) {
 
-  
-    if (ToggleState) {
-        LeftMotor->setVelocity(speed);
-        MiddleMotor->setVelocity(speed);
-        RightMotor->setVelocity(speed); 
-    }
-
-    else{
-        LeftMotor->setVelocity(0);
-        MiddleMotor->setVelocity(0);
-        RightMotor->setVelocity(0);
-    }
+    LeftMotor->setVelocity(speed);
+    MiddleMotor->setVelocity(speed);
+    RightMotor->setVelocity(speed); 
 }
 
 
@@ -337,44 +329,30 @@ void ActuatorControl::update(uint8_t buf) {
 
     switch(buf) {
         case 0x02:
-            DynamicBalancer->movePosition(3);
-            if (LeftMotor->getDirection() == Direction::Forward) {
-                LeftMotor->setDirection(Direction::Reverse);
-            }
-            else if (LeftMotor->getDirection() == Direction::Reverse) {
-                LeftMotor->setDirection(Direction::Forward);
-            }
+            DynamicBalancer->movePosition(3);  
+            LeftMotor->getDirection() == Direction::Forward ? LeftMotor->setDirection(Direction::Reverse) : LeftMotor->setDirection(Direction::Forward);
             LeftEventTime = millis();
             break;
         case 0x03:
             DynamicBalancer->movePosition(2);
-            if (MiddleMotor->getDirection() == Direction::Forward) {
-                MiddleMotor->setDirection(Direction::Reverse);
-            }
-            else if (MiddleMotor->getDirection() == Direction::Reverse) {
-                MiddleMotor->setDirection(Direction::Forward);
-            }
+            MiddleMotor->getDirection() == Direction::Forward ? MiddleMotor->setDirection(Direction::Reverse) : MiddleMotor->setDirection(Direction::Forward);
             MiddleEventTime = millis();
             break;
         case 0x04:
             DynamicBalancer->movePosition(1);
-            if (RightMotor->getDirection() == Direction::Forward) {
-                RightMotor->setDirection(Direction::Reverse);
-            }
-            else if (RightMotor->getDirection() == Direction::Reverse) {
-                RightMotor->setDirection(Direction::Forward);
-            }
+            RightMotor->getDirection() == Direction::Forward ? RightMotor->setDirection(Direction::Reverse) : RightMotor->setDirection(Direction::Forward);
             RightEventTime = millis();
             break;
     }
 
     if (currentTime < LeftEventTime + waitTime) {
-        if (LeftMotor->getDirection() == Direction::Forward) {
-            LeftMotor->setVelocity(speed);
-        }
-        else if (LeftMotor->getDirection() == Direction::Reverse) {
-            LeftMotor->setVelocity(-speed);
-        }
+        LeftMotor->getDirection() == Direction::Forward ? LeftMotor->setVelocity(speed) : LeftMotor->setVelocity(-speed);
+        // if (LeftMotor->getDirection() == Direction::Forward) {
+        //     LeftMotor->setVelocity(speed);
+        // }
+        // else if (LeftMotor->getDirection() == Direction::Reverse) {
+        //     LeftMotor->setVelocity(-speed);
+        // }
     }
     else {
         LeftMotor->setVelocity(0);
@@ -403,86 +381,5 @@ void ActuatorControl::update(uint8_t buf) {
     else {
         RightMotor->setVelocity(0);
     }
-
-
-    // if (LToggle) {
-    //     DynamicBalancer->movePosition(3);
-    //     left_was_toggled = true;
-    //     if (LeftMotor->getDirection() == Direction::Forward) {
-    //         LeftMotor->setVelocity(speed);
-    //         MiddleMotor->setVelocity(0);
-    //         RightMotor->setVelocity(0);
-    //     }
-    //     else if (LeftMotor->getDirection() == Direction::Reverse) {
-    //         LeftMotor->setVelocity(-speed);
-    //         MiddleMotor->setVelocity(0);
-    //         RightMotor->setVelocity(0);
-    //     }
-    // }
-
-    // else if (!LToggle && left_was_toggled){
-
-    //     if (LeftMotor->getDirection() == Direction::Forward && left_was_toggled) {
-    //         LeftMotor->setDirection(Direction::Reverse);
-    //         left_was_toggled = false;
-    //     }
-    //     else if (MiddleMotor->getDirection() == Direction::Reverse && left_was_toggled) {
-    //         LeftMotor->setDirection(Direction::Forward);
-    //         left_was_toggled = false;
-    //     }
-    // }
-
-    // if (MToggle) {
-    //     DynamicBalancer->movePosition(2);
-    //     middle_was_toggled = true;
-    //     if (MiddleMotor->getDirection() == Direction::Forward) {
-    //         LeftMotor->setVelocity(0);
-    //         MiddleMotor->setVelocity(speed);
-    //         RightMotor->setVelocity(0);
-    //     }
-    //     else if (MiddleMotor->getDirection() == Direction::Reverse) {
-    //         LeftMotor->setVelocity(0);
-    //         MiddleMotor->setVelocity(-speed);
-    //         RightMotor->setVelocity(0);
-    //     }
-    // }
-
-    // else if (!MToggle && middle_was_toggled){
-
-    //     if (MiddleMotor->getDirection() == Direction::Forward && middle_was_toggled) {
-    //         MiddleMotor->setDirection(Direction::Reverse);
-    //         middle_was_toggled = false;
-    //     }
-    //     else if (MiddleMotor->getDirection() == Direction::Reverse && middle_was_toggled) {
-    //         MiddleMotor->setDirection(Direction::Forward);
-    //         middle_was_toggled = false;
-    //     }
-    // }
-
-    // if (RToggle) {
-    //     DynamicBalancer->movePosition(1);
-    //     right_was_toggled = true;
-    //     if (RightMotor->getDirection() == Direction::Forward) {
-    //         LeftMotor->setVelocity(0);
-    //         MiddleMotor->setVelocity(0);
-    //         RightMotor->setVelocity(speed);
-    //     }
-    //     else if (RightMotor->getDirection() == Direction::Reverse) {
-    //         LeftMotor->setVelocity(0);
-    //         MiddleMotor->setVelocity(0);
-    //         RightMotor->setVelocity(-speed);
-    //     }
-    // }
-
-    // else if (!RToggle && right_was_toggled){
-    //     if (RightMotor->getDirection() == Direction::Forward && right_was_toggled) {
-    //         RightMotor->setDirection(Direction::Reverse);
-    //         right_was_toggled = false;
-    //     }
-    //     else if (RightMotor->getDirection() == Direction::Reverse && right_was_toggled) {
-    //         RightMotor->setDirection(Direction::Forward);
-    //         right_was_toggled = false;
-    //     }
-    // }
 
 }

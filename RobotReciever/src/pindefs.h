@@ -18,12 +18,12 @@ the expander should be specifically notified as expander pins and which ones the
 
 
 // For the drive motors
-#define L_MOTOR_LPWM A0
-#define L_MOTOR_RPWM A1
-#define M_MOTOR_LPWM A2
-#define M_MOTOR_RPWM A3
-#define R_MOTOR_LPWM A4
-#define R_MOTOR_RPWM A5
+#define L_MOTOR_LPWM 5
+#define L_MOTOR_RPWM 6
+#define M_MOTOR_LPWM 9
+#define M_MOTOR_RPWM 10
+#define R_MOTOR_LPWM 11
+#define R_MOTOR_RPWM 12
 
 
 // For the encoders - all ENCODER_B values are on the expander board. also, M_ENCODER_A is on the expander board.
@@ -44,8 +44,8 @@ the expander should be specifically notified as expander pins and which ones the
 #define R_ACTUATOR_RPWM 15      // expander pin B7
 
 
-#define STEPPER_PIN_PUL 11       
-#define STEPPER_PIN_DIR 12       
-#define LIMIT_SWITCH_PIN 10       
+#define STEPPER_PIN_PUL A2       
+#define STEPPER_PIN_DIR A3       
+#define LIMIT_SWITCH_PIN A0
 
 #endif
