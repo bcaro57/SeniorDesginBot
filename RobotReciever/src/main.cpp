@@ -75,14 +75,14 @@ void loop() {
 
     if(rf95.recv(buf, &len)) {
       // setting the button toggle variable
-      bool MotorToggle = DriveData.ButtonToggle(buf[0], 0x01);
+      bool AutonomousToggle = DriveData.ButtonToggle(buf[0], 0x01);
 
       int DriveSpeed = DriveData.MapValue(buf[2]);
       // updating each controller
-      Led.update(buf[0], MotorToggle);
-      Led.update(buf[1], MotorToggle);
+      Led.update(buf[0], AutonomousToggle);
+      Led.update(buf[1], AutonomousToggle);
       DriveController.setSpeed(DriveSpeed);
-      DriveController.update(buf[0], MotorToggle);
+      DriveController.update();
       ActuatorController.update(buf[1]);
     }
     

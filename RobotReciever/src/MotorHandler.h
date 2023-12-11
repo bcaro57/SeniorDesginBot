@@ -203,7 +203,7 @@ class DriveControl{
 
         void init();
         void setSpeed(int percent);
-        void update(uint8_t buf, bool ToggleState = false);
+        void update();
     private:
 
         MotorDriver* LeftMotor;

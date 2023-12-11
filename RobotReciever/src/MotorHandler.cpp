@@ -114,7 +114,7 @@ void StepperDriver::init() {
 }
 void StepperDriver::movePosition(int targetPos) {
     myStepper.run();
-    
+
 
     if (!calibrated){
         return;
@@ -282,7 +282,7 @@ void DriveControl::setSpeed(int percent) {
     
     speed = percent;
 }
-void DriveControl::update(uint8_t buf, bool ToggleState) {
+void DriveControl::update() {
 
     LeftMotor->setVelocity(speed);
     MiddleMotor->setVelocity(speed);
