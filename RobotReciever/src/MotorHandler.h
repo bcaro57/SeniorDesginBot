@@ -98,7 +98,7 @@ class StepperDriver{
 
 
 /*
-pulsePin - allows us to keep track of if the interrupt pins, specifying the pin used and the 
+pulsePin - allows us to keep track of if the interrupt pins, specifying the pin used and the board they're on
 */
 
 
@@ -114,7 +114,10 @@ enum class pulsePin{
 Encoder - designed to handle the encoder from a drive motor. needs to use "glue routines" to get interrupts
           working in the class, which are necessary because the encoder is a quaditure encoder. to do this,
           three instances are created (and set to NULL), and external wheelSpeed (the ISR) functions are
-          created with a switch/case that looks for the different available 'pulseA' pins.
+          created with a switch/case that looks for the different available 'pulseA' pins. 
+          
+          This works with the hardware interrupt pins (of which there are 2 available, with the 2 others 
+          being taken up by the GPIO expander board). Have not found a workaround yet.
 
 inputs into the constructor: the 'pulseA' pin and 'pulseB' pin, which are responsible for interpreting the 
                              data from the quaditure encoder, where the 'pulseA' must be attached to an interrupt
@@ -174,6 +177,33 @@ class Encoder{
         int pulseB;
         Direction direction;
         Adafruit_MCP23X17* MCP;
+};
+
+
+/*
+** currently under construction **
+MotorClosedLoop - designed for closed loop motor control. currently waiting on encoder functionality
+                and can implement PID speed control after that.
+
+inputs into constructor: a motor and an associated encoder
+
+methods:
+    init()              -> initializes the motor and encoder objects
+
+variables:
+    Motor               -> an object of the motor
+    MotorEncoder        -> an object of the encoder
+*/
+
+class MotorClosedLoop{
+    public:
+        MotorClosedLoop(MotorDriver* _motor, Encoder* _encoder);
+
+        void init();
+
+    private:
+        MotorDriver* Motor;
+        Encoder* MotorEncoder;
 };
 
 
@@ -263,33 +293,7 @@ class ActuatorControl{
         unsigned long MiddleEventTime;
         unsigned long RightEventTime;
 
-        int waitTime = 2000;
-};
-
-
-/*
-** currently under construction **
-MotorClosedLoop - designed for closed loop motor control
-
-inputs into constructor: a motor and an associated encoder
-
-methods:
-    init()              -> initializes the motor and encoder objects
-
-variables:
-    Motor               -> the motor in question
-    MotorEncoder        -> the encoder in question
-*/
-
-class MotorClosedLoop{
-    public:
-        MotorClosedLoop(MotorDriver* _motor, Encoder* _encoder);
-
-        void init();
-
-    private:
-        MotorDriver* Motor;
-        Encoder* MotorEncoder;
+        int waitTime = 5000;   //5 seconds for the motors to go up/down
 };
 
 

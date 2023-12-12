@@ -347,36 +347,22 @@ void ActuatorControl::update(uint8_t buf) {
 
     if (currentTime < LeftEventTime + waitTime) {
         LeftMotor->getDirection() == Direction::Forward ? LeftMotor->setVelocity(speed) : LeftMotor->setVelocity(-speed);
-        // if (LeftMotor->getDirection() == Direction::Forward) {
-        //     LeftMotor->setVelocity(speed);
-        // }
-        // else if (LeftMotor->getDirection() == Direction::Reverse) {
-        //     LeftMotor->setVelocity(-speed);
-        // }
     }
     else {
         LeftMotor->setVelocity(0);
     }
 
     if (currentTime < MiddleEventTime + waitTime) {
-        if (MiddleMotor->getDirection() == Direction::Forward) {
-            MiddleMotor->setVelocity(speed);
-        }
-        else if (MiddleMotor->getDirection() == Direction::Reverse) {
-            MiddleMotor->setVelocity(-speed);
-        }
+        MiddleMotor->getDirection() == Direction::Forward ? MiddleMotor->setVelocity(speed) : MiddleMotor->setVelocity(-speed);
+
     }
     else {
         MiddleMotor->setVelocity(0);
     }
 
     if (currentTime < RightEventTime + waitTime) {
-        if (RightMotor->getDirection() == Direction::Forward) {
-            RightMotor->setVelocity(speed);
-        }
-        else if (RightMotor->getDirection() == Direction::Reverse) {
-            RightMotor->setVelocity(-speed);
-        }
+        RightMotor->getDirection() == Direction::Forward ? RightMotor->setVelocity(speed) : RightMotor->setVelocity(-speed);
+
     }
     else {
         RightMotor->setVelocity(0);
