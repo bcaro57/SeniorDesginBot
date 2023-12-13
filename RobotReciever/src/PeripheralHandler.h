@@ -86,7 +86,7 @@ class DataInfo {
     int MapValue(uint8_t bufData) {
       // return ((bufData - in_min) * (out_max - out_min) / (in_max - in_min)) + out_min;
       // return ((bufData - 0) * (100 - -100) / (255 - 0)) + -100;
-      return map(bufData, 0, 255, -100, 100);
+      return map(bufData, 0, 255, 60, -60);
     }
 
   private:

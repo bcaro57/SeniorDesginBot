@@ -67,7 +67,7 @@ void setup() {
 
 
 void loop() {
-  Serial.println("we're in the loop");
+  Balancer.calibrate();
   if(rf95.available()) {
 
     uint8_t buf[bufLen];

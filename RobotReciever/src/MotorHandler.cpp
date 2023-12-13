@@ -91,36 +91,33 @@ StepperDriver::StepperDriver(int _pulse_pin, int _dir_pin, int _sensor_pin): pul
 {}
 void StepperDriver::init() {
 
-    calibrated = false;
     pinMode(sensorPin, INPUT_PULLUP);
     myStepper = AccelStepper(1, pulsePin, dirPin);
-    myStepper.setMaxSpeed(350);
-    myStepper.setSpeed(350);
-    myStepper.setAcceleration(500);
-
-    while (!calibrated){
-        myStepper.setSpeed(-300);
-        myStepper.runSpeed();
-        if (digitalRead(sensorPin) == 1) {
-            myStepper.setCurrentPosition(0);
-            delay(100);
-            calibrated = true;
-        }
-    }
 
     myStepper.setMaxSpeed(8000);
     myStepper.setSpeed(8000);
     myStepper.setAcceleration(2500);
+    calibrated = false;
+}
+void StepperDriver::calibrate(){
+    while (calibrated == false){
+        myStepper.setSpeed(-2000);
+        myStepper.runSpeed();
+        delay(2);
+        if (digitalRead(sensorPin) == HIGH) {
+            myStepper.setCurrentPosition(0);
+            calibrated = true;
+        }
+    }
 }
 void StepperDriver::movePosition(int targetPos) {
-    myStepper.run();
-
 
     if (!calibrated){
         return;
     }
 
     else {
+        myStepper.run();
         switch(targetPos) {
             case 1:
                 myStepper.runToNewPosition(0);

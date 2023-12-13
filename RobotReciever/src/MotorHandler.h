@@ -84,6 +84,7 @@ class StepperDriver{
         StepperDriver(int _pulse_pin, int _dir_pin, int _sensor_pin);
 
         void init();
+        void calibrate();
         void movePosition(int targetPos);
 
     private:
@@ -91,9 +92,9 @@ class StepperDriver{
         int dirPin;
         int sensorPin;
         AccelStepper myStepper;
-        bool calibrated;
         int halfLength = 4500;
-        int fullLength = 8500;
+        int fullLength = 9000;
+        bool calibrated;
 };
 
 
